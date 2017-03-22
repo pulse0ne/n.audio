@@ -1,0 +1,8 @@
+{
+    "name": "n-audio",
+    "version": "0.0.1",
+    "dependencies": {
+        "mplayer": "2.1.0",
+        "ws": "2.2.2"
+    }
+}
