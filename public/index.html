@@ -9,6 +9,10 @@
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
 {{1 + 2}}
+<button ng-click="togglePlaystate()">Play/Pause</button>
+<button ng-click="randomVolume()">Random Volume</button>
+
+{{nowplaying | json}}
 </body>
 
 <!-- angular -->
@@ -23,6 +27,7 @@
 
 <!-- other lib -->
 <script src="lib/websocket.js"></script>
+<script src="../common/enums.js"></script>
 
 <!-- app -->
 <script src="app.js"></script>
