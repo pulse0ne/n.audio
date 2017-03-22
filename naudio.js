@@ -24,3 +24,15 @@ var app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(8080);
+
+var PlayStateEnum = {
+    STOPPED: 0,
+    PLAYING: 1,
+    PAUSED: 2
+};
+
+Object.freeze(PlayStateEnum);
+
+// globals
+var seconds = 0;
+var playstate = PlayStateEnum.STOPPED;
