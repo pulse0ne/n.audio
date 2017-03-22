@@ -14,3 +14,13 @@
 // setTimeout(player.volume.bind(player, 50), 10000);
 
 
+var express = require('express');
+var mplayer = require('mplayer');
+var path = require('path');
+var ws = require('ws');
+
+var app = express();
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.listen(8080);

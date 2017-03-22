@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="n.audio">
 <head>
     <meta charset="UTF-8">
     <title>n.audio</title>
 
-    <link href="lib/material/angular-material.min.css" rel="stylesheet">
+    <link href="lib/vendor/material/angular-material.min.css" rel="stylesheet">
 </head>
-<body>
-
+<body ng-controller="n.audio.controller.main" ng-cloak>
+{{1 + 2}}
 </body>
 
 <!-- angular -->
-<script src="lib/angular/angular.min.js"></script>
-<script src="lib/angular/angular-aria.min.js"></script>
-<script src="lib/angular/angular-animate.min.js"></script>
-<script src="lib/angular/angular-resource.min.js"></script>
-<script src="lib/angular/angular-route.min.js"></script>
+<script src="lib/vendor/angular/angular.min.js"></script>
+<script src="lib/vendor/angular/angular-aria.min.js"></script>
+<script src="lib/vendor/angular/angular-animate.min.js"></script>
+<script src="lib/vendor/angular/angular-resource.min.js"></script>
+<script src="lib/vendor/angular/angular-route.min.js"></script>
 
 <!-- material -->
-<script src="lib/material/angular-material.min.js"></script>
+<script src="lib/vendor/material/angular-material.min.js"></script>
+
+<!-- other lib -->
+<script src="lib/websocket.js"></script>
 
 <!-- app -->
 <script src="app.js"></script>

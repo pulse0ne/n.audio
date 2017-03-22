@@ -3,13 +3,20 @@
  */
 'use strict';
 
-var naudio = angular.module('n.audio', ['ngMaterial']);
+var app = angular.module('n.audio', ['ngMaterial', 'ngWebsocket']);
 
-naudio.controller('n.audio.controller.main', [
+app.service('n.audio.service', [
+    '$websocket',
+    function () {
+        setTimeout(function () { console.log('service')}, 4000);
+    }
+]);
+
+app.controller('n.audio.controller.main', [
     '$scope',
     '$rootScope',
-    '$'
-    function () {
-
+    'n.audio.service',
+    function ($scope, $rootScope, naudio) {
+        setTimeout(function () { console.log('controller')}, 2000);
     }
 ]);
