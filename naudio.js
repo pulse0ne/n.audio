@@ -49,7 +49,6 @@ var updatePlaystate = function (state) {
 };
 
 player.on('status', status => {
-    console.log(status);
     nowplaying.volume = status.volume;
     nowplaying.time.total = status.duration;
 });
@@ -75,7 +74,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();

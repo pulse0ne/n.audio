@@ -36,11 +36,11 @@ app.controller('n.audio.controller.main', [
         var CommandEnum = (window.enums || {}).CommandEnum || {};
         var PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
         $scope.nowplaying = {};
+        $scope.slider = {};
 
         naudio.register(function (msg) {
-            console.log('got broadcast');
-            console.log(msg);
             $scope.nowplaying = msg;
+            $scope.slider.position = (msg.time.current / (msg.time.total || 1)) * 100;
             $scope.$apply();
         });
 

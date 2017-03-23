@@ -8,11 +8,16 @@
     <link rel="stylesheet" href="assets/naudio.css">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-{{1 + 2}}
 <button ng-click="togglePlaystate()">Play/Pause</button>
 <button ng-click="randomVolume()">Random Volume</button>
-
+<br>
 {{nowplaying | json}}
+
+<md-slider-container>
+    <span>{{nowplaying.time.current}}</span>
+    <md-slider flex md-discrete min="0" max="100" step="1" ng-model="slider.position"></md-slider>
+    <span>{{nowplaying.time.total}}</span>
+</md-slider-container>
 </body>
 
 <!-- angular -->
