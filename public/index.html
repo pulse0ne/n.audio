@@ -13,11 +13,18 @@
 <br>
 {{nowplaying | json}}
 
-<md-slider-container>
-    <span>{{nowplaying.time.current}}</span>
-    <md-slider flex md-discrete min="0" max="100" step="1" ng-model="slider.position"></md-slider>
-    <span>{{nowplaying.time.total}}</span>
-</md-slider-container>
+<div id="track-container">
+    <div id="track-slider" layout="row" layout-align="center center">
+        <span>{{nowplaying.time.current | trackTime}}</span>
+        <div id="track-bar">
+            <div id="track-progress" ng-style="barStyle">
+                <div id="track-thumb" draggable="true" ondragstart="trackDragStart(event)"></div>
+            </div>
+        </div>
+        <span>{{nowplaying.time.total | trackTime}}</span>
+    </div>
+</div>
+
 </body>
 
 <!-- angular -->
@@ -29,6 +36,9 @@
 
 <!-- material -->
 <script src="lib/vendor/material/angular-material.min.js"></script>
+
+<!-- moment -->
+<script src="lib/vendor/moment/moment.min.js"></script>
 
 <!-- other lib -->
 <script src="lib/websocket.js"></script>

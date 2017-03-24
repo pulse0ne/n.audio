@@ -31,16 +31,20 @@ app.service('n.audio.service', [
 app.controller('n.audio.controller.main', [
     '$scope',
     '$rootScope',
+    '$timeout',
     'n.audio.service',
-    function ($scope, $rootScope, naudio) {
+    function ($scope, $rootScope, $timeout, naudio) {
         var CommandEnum = (window.enums || {}).CommandEnum || {};
         var PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
         $scope.nowplaying = {};
-        $scope.slider = {};
+        $scope.slider = { position: 0 };
+        $scope.barStyle = {
+            width: '0%'
+        };
 
         naudio.register(function (msg) {
-            $scope.nowplaying = msg;
-            $scope.slider.position = (msg.time.current / (msg.time.total || 1)) * 100;
+            angular.merge($scope.nowplaying, msg);
+            $scope.barStyle.width = ((msg.time.current / (msg.time.total || 0)) * 100) + '%';
             $scope.$apply();
         });
 
@@ -53,3 +57,10 @@ app.controller('n.audio.controller.main', [
         };
     }
 ]);
+
+app.filter('trackTime', function () {
+    return function (val) {
+        var dur = moment.duration(val * 1000);
+        return moment(dur.asMilliseconds()).format('mm:ss');
+    }
+});
