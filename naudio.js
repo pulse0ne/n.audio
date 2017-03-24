@@ -34,7 +34,7 @@ var nowplaying = {
     upnext: null,
     playlist: null
 };
-var wsServer = new ws.Server({ port: 1776, path: '/ws' });
+var wsServer = new ws.Server({ port: 1777, path: '/ws' });
 var player = new mplayer();
 
 wsServer.broadcast = function (data) {
@@ -74,8 +74,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                     // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                      player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    //player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();
@@ -85,6 +85,7 @@ wsServer.on('connection', function (websocket) {
                 }
                 break;
             case CommandEnum.SEEK_TO:
+                player.seekPercent(message.data);
                 break;
             case CommandEnum.SET_VOLUME:
                 player.volume(message.data);

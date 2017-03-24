@@ -18,11 +18,24 @@
 <br>
 {{nowplaying | json}}
 
-<n-track-slider total="nowplaying.time.total" current="nowplaying.time.current"></n-track-slider>
+<n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
+<div class="control-container">
+    <div class="previous-control" ng-click="changePrevious()">
+        <i class="fa fa-2x fa-fw fa-step-backward"></i>
+    </div>
+    <div class="playstate-control" ng-click="togglePlaystate()">
+        <i class="fa fa-3x fa-fw"
+           ng-class="{'fa-pause': nowplaying.playstate === PlayStateEnum.PLAYING,
+                      'fa-play': nowplaying.playstate !== PlayStateEnum.PLAYING,
+                      'play-adjust': nowplaying.playstate !== PlayStateEnum.PLAYING}"></i>
+    </div>
+    <div class="next-control" ng-click="changeNext()">
+        <i class="fa fa-2x fa-fw fa-step-forward"></i>
+    </div>
+</div>
 
-<n-play-state playstate="nowplaying.playstate"></n-play-state>
-
-</body>
+<!-- jquery -->
+<script src="lib/vendor/jquery/jquery.min.js"></script>
 
 <!-- angular -->
 <script src="lib/vendor/angular/angular.min.js"></script>
@@ -44,4 +57,5 @@
 
 <!-- app -->
 <script src="app.js"></script>
+</body>
 </html>

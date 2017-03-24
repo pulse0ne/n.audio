@@ -1,4 +1,40 @@
 body {
     background: #272822;
-    color: dodgerblue;
+    color: #eeeeee;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.playstate-control {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: 3px solid #eeeeee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playstate-control,
+.playstate-control:active,
+.playstate-control:focus {
+    outline: none;
+}
+
+.play-adjust {
+    padding-left: 6px;
+}
+
+.control-container {
+    display: flex;
+    align-items: center;
+}
+
+.playstate-control,
+.previous-control,
+.next-control {
+    cursor: pointer;
+    margin: 0 10px;
 }

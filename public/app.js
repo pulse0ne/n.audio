@@ -16,7 +16,7 @@ app.service('n.audio.service', [
         var self = this;
 
         var ws = $websocket.$new({
-            url: 'ws://localhost:1776/ws',
+            url: 'ws://localhost:1777/ws',
             reconnect: true,
             reconnectInterval: 1000,
             maxReconnectInterval: 10000,
@@ -51,20 +51,25 @@ app.controller('n.audio.controller.main', [
     '$timeout',
     'n.audio.service',
     function ($scope, $rootScope, $timeout, naudio) {
-        var CommandEnum = (window.enums || {}).CommandEnum || {};
-        var PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
-        $scope.nowplaying = {};
-        $scope.slider = { position: 0 };
-        $scope.barStyle = {
-            width: '0%'
+        $scope.CommandEnum = (window.enums || {}).CommandEnum || {};
+        $scope.PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
+        $scope.nowplaying = {
+            playstate: $scope.PlayStateEnum.PAUSED,
+            time: {
+                current: 0,
+                total: 0
+            }
         };
 
         // TODO: handle multiple message types
         $rootScope.$on('ws.message', function (evt, msg) {
             angular.merge($scope.nowplaying, msg);
-            $scope.barStyle.width = ((msg.time.current / (msg.time.total || 0)) * 100) + '%';
             $scope.$apply();
         });
+
+        $scope.onSeek = function (percent) {
+            naudio.cmd({ command: $scope.CommandEnum.SEEK_TO, data: percent });
+        };
 
         // TODO///////////////////////////
         // TODO    Start Test Area    ////
@@ -80,11 +85,12 @@ app.controller('n.audio.controller.main', [
         });
 
         $scope.togglePlaystate = function () {
-            naudio.cmd({ command: CommandEnum.SET_PLAYSTATE, data: PlayStateEnum.PLAYING });
+            var newState = ($scope.nowplaying || {}).playstate === $scope.PlayStateEnum.PLAYING ? $scope.PlayStateEnum.PAUSED : $scope.PlayStateEnum.PLAYING;
+            naudio.cmd({ command: $scope.CommandEnum.SET_PLAYSTATE, data: newState });
         };
 
         $scope.randomVolume = function () {
-            naudio.cmd({ command: CommandEnum.SET_VOLUME, data: Math.floor(Math.random() * 100) });
+            naudio.cmd({ command: $scope.CommandEnum.SET_VOLUME, data: Math.floor(Math.random() * 100) });
         };
         // TODO///////////////////////////
         // TODO     End Test Area     ////
@@ -93,24 +99,6 @@ app.controller('n.audio.controller.main', [
         naudio.connect();
     }
 ]);
-
-app.directive('nPlayState', function () {
-    return {
-        restrict: 'E',
-        replace: true,
-        scope: { playstate: '=' },
-        template: '<i class="clickable fa fa-2x fa-{{ligature}}"></i>',
-        link: function (scope) {
-            scope.ligature = 'play';
-
-            scope.$watch('playstate', function (newVal, oldVal) {
-                if (oldVal !== newVal) {
-                    scope.ligature = scope.playstate === window.enums.PlayStateEnum.PLAYING ? 'pause' : 'play';
-                }
-            });
-        }
-    };
-});
 
 app.filter('trackTime', function () {
     return function (val) {

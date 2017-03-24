@@ -23,34 +23,31 @@ _slider.factory('nSliderFactory', [function () {
         var self = this;
         self.scope = scope;
         self.elem = elem;
-        self.internal = false;
-        self.scope.progressStyle = {
-            width: '0%'
-        };
-        self.scope.track = {
-            total: 0,
-            current: 0
-        };
+        self.scope.progressStyle = { width: '0%' };
+        self.scope.track = { total: 0, current: 0 };
+        self.barElem = self.elem.find('.track-bar');
 
-        var updateProgress = function (curr, tot) {
+        self.updateProgress = function (curr, tot) {
             self.scope.progressStyle.width = ((curr / (tot || 1)) * 100) + '%';
         };
 
+        self.getEventPosPercent = function (event) {
+            var barWidth = this.barElem.width();
+            var barOffset = this.barElem.offset().left;
+            return ((event.clientX - barOffset) / (barWidth || 1)) * 100;
+        };
+
         self.scope.$watch('current', function (newVal, oldVal) {
-            if (!self.internal && newVal !== oldVal) {
-                // TODO
-                console.log('current changed');
+            if (newVal !== oldVal) {
                 self.scope.track.current = newVal;
-                updateProgress(self.scope.track.current, self.scope.track.total);
+                self.updateProgress(self.scope.track.current, self.scope.track.total);
             }
         });
 
         self.scope.$watch('total', function (newVal, oldVal) {
-            if (!self.internal && newVal !== oldVal) {
-                // TODO
-                console.log('total changed');
+            if (newVal !== oldVal) {
                 self.scope.track.total = newVal;
-                updateProgress(self.scope.track.current, self.scope.track.total);
+                self.updateProgress(self.scope.track.current, self.scope.track.total);
             }
         });
 
@@ -58,34 +55,26 @@ _slider.factory('nSliderFactory', [function () {
             self.unbindEvents();
         });
 
-        self.initElementHandles = function () {
-
-        };
-
-        self.manageElementsStyle = function () {
-
-        };
-
-        self.initHandles = function () {
-
-        };
-
-        self.manageEventBindings = function () {
-
-        };
-
         self.bindEvents = function () {
-
+            self.barElem.on('mousedown', angular.bind(self, self.onSeek));
+            self.barElem.on('touchstart', angular.bind(self, self.onSeek));
         };
 
         self.unbindEvents = function () {
-
+            self.barElem.off();
         };
 
-        self.initElementHandles();
-        self.manageElementsStyle(); // TODO?
-        self.initHandles();
-        self.manageEventBindings();
+        self.onSeek = function (event) {
+            console.log('onSeek');
+            event.stopPropagation();
+            event.preventDefault();
+            var newPos = this.getEventPosPercent(event);
+            if (this.scope.onSeek)
+                this.scope.onSeek(newPos);
+        };
+
+        // do the bind
+        self.bindEvents();
     };
 }]);
 
@@ -96,7 +85,7 @@ _slider.directive('nTrackSlider', ['nSliderFactory', function (Slider) {
         scope: {
             current: '=',
             total: '=',
-            callbacks: '=?'
+            onSeek: '=?'
         },
         template: _slider_tmpl,
         link: function (scope, elem) {
