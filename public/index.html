@@ -5,25 +5,22 @@
     <title>n.audio</title>
 
     <link rel="stylesheet" href="lib/vendor/material/angular-material.min.css">
+    <link rel="stylesheet" href="lib/vendor/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="lib/slider/slider.css">
     <link rel="stylesheet" href="assets/naudio.css">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
+<div>
+    Websocket Connected: {{TEST_WS_CONNECTED}}
+</div>
 <button ng-click="togglePlaystate()">Play/Pause</button>
 <button ng-click="randomVolume()">Random Volume</button>
 <br>
 {{nowplaying | json}}
 
-<div id="track-container">
-    <div id="track-slider" layout="row" layout-align="center center">
-        <span>{{nowplaying.time.current | trackTime}}</span>
-        <div id="track-bar">
-            <div id="track-progress" ng-style="barStyle">
-                <div id="track-thumb" draggable="true" ondragstart="trackDragStart(event)"></div>
-            </div>
-        </div>
-        <span>{{nowplaying.time.total | trackTime}}</span>
-    </div>
-</div>
+<n-track-slider total="nowplaying.time.total" current="nowplaying.time.current"></n-track-slider>
+
+<n-play-state playstate="nowplaying.playstate"></n-play-state>
 
 </body>
 
@@ -42,6 +39,7 @@
 
 <!-- other lib -->
 <script src="lib/websocket.js"></script>
+<script src="lib/slider/slider.js"></script>
 <script src="../common/enums.js"></script>
 
 <!-- app -->
