@@ -3,24 +3,22 @@
  */
 'use strict';
 
-var _slider_tmpl = '' +
+const _slider_tmpl = '' +
     '<div class="track-container">' +
     '  <div class="track-slider" layout="row" layout-align="center center">' +
-    '    <span>{{track.current | trackTime}}</span>' +
+    '    <span class="time-label">{{track.current | trackTime}}</span>' +
     '    <div class="track-bar">' +
-    '      <div class="track-progress" ng-style="progressStyle">' +
-    '        <div class="track-thumb"></div>' +
-    '      </div>' +
+    '      <div class="track-progress" ng-style="progressStyle"></div>' +
     '    </div>' +
-    '    <span>{{track.total | trackTime}}</span>' +
+    '    <span class="time-label">{{track.total | trackTime}}</span>' +
     '  </div>' +
     '</div>';
 
-var _slider = angular.module('n.audio.track.slider', ['ngMaterial']);
+const _slider = angular.module('n.audio.track.slider', ['ngMaterial']);
 
 _slider.factory('nSliderFactory', [function () {
     return function (scope, elem) {
-        var self = this;
+        const self = this;
         self.scope = scope;
         self.elem = elem;
         self.scope.progressStyle = { width: '0%' };
@@ -32,8 +30,8 @@ _slider.factory('nSliderFactory', [function () {
         };
 
         self.getEventPosPercent = function (event) {
-            var barWidth = this.barElem.width();
-            var barOffset = this.barElem.offset().left;
+            let barWidth = this.barElem.width();
+            let barOffset = this.barElem.offset().left;
             return ((event.clientX - barOffset) / (barWidth || 1)) * 100;
         };
 
@@ -57,7 +55,7 @@ _slider.factory('nSliderFactory', [function () {
 
         self.bindEvents = function () {
             self.barElem.on('mousedown', angular.bind(self, self.onSeek));
-            self.barElem.on('touchstart', angular.bind(self, self.onSeek));
+            // self.barElem.on('touchstart', angular.bind(self, self.onSeek));
         };
 
         self.unbindEvents = function () {
@@ -68,7 +66,7 @@ _slider.factory('nSliderFactory', [function () {
             console.log('onSeek');
             event.stopPropagation();
             event.preventDefault();
-            var newPos = this.getEventPosPercent(event);
+            let newPos = this.getEventPosPercent(event);
             if (this.scope.onSeek)
                 this.scope.onSeek(newPos);
         };
@@ -96,7 +94,7 @@ _slider.directive('nTrackSlider', ['nSliderFactory', function (Slider) {
 
 _slider.filter('trackTime', function () {
     return function (val) {
-        var dur = moment.duration(val * 1000);
+        let dur = moment.duration(val * 1000);
         return moment(dur.asMilliseconds()).format('mm:ss');
     }
 });

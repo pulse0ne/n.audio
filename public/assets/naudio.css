@@ -1,6 +1,13 @@
+html,
 body {
     background: #272822;
     color: #eeeeee;
+    height: 100%;
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 .clickable {
@@ -10,16 +17,42 @@ body {
 .playstate-control {
     width: 75px;
     height: 75px;
+}
+
+.previous-control,
+.next-control {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5em;
+}
+
+.playstate-control,
+.previous-control,
+.next-control {
     border-radius: 50%;
     border: 3px solid #eeeeee;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    margin: 0 8px;
+}
+
+.playstate-control:hover,
+.previous-control:hover,
+.next-control:hover {
+    border-color: #ff5573;
 }
 
 .playstate-control,
 .playstate-control:active,
-.playstate-control:focus {
+.playstate-control:focus,
+.previous-control,
+.previous-control:active,
+.previous-control:focus,
+.next-control,
+.next-control:active,
+.next-control:focus {
     outline: none;
 }
 
@@ -28,13 +61,93 @@ body {
 }
 
 .control-container {
+    margin: 5px auto;
     display: flex;
     align-items: center;
 }
 
-.playstate-control,
-.previous-control,
-.next-control {
-    cursor: pointer;
-    margin: 0 10px;
+.main {
+    min-height: 100%;
+}
+
+.content {
+    padding: 5px;
+    padding-bottom: 120px;
+}
+
+.sticky-footer {
+    background: #272822;
+    border-top: 1px solid #444444;
+    height: 120px;
+    margin-top: -120px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ws-indicator {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #0cabdd;
+    animation: pulse-blue 1.5s ease-in-out infinite alternate;
+}
+
+.ws-indicator.failed {
+    background-color: #dd0000;
+    animation: pulse-red 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-red {
+    from {
+        box-shadow:
+                0 0 3px #dd0000,
+                0 0 5px #dd0000,
+                0 0 9px #dd0000,
+                0 0 11px #dd0000,
+                0 0 13px #dd0000,
+                0 0 15px #dd0000,
+                0 0 17px #dd0000
+    }
+    to {
+        box-shadow:
+                0 0 1px #dd0000,
+                0 0 2px #dd0000,
+                0 0 4px #dd0000,
+                0 0 5px #dd0000,
+                0 0 6px #dd0000,
+                0 0 7px #dd0000,
+                0 0 8px #dd0000
+    }
+}
+
+@keyframes pulse-blue {
+    from {
+        box-shadow:
+                0 0 2px #0cabdd,
+                0 0 4px #0cabdd,
+                0 0 8px #0cabdd,
+                0 0 10px #0cabdd,
+                0 0 12px #0cabdd,
+                0 0 14px #0cabdd,
+                0 0 16px #0cabdd
+    }
+    to {
+        box-shadow:
+                0 0 0 #0cabdd,
+                0 0 3px #0cabdd,
+                0 0 7px #0cabdd,
+                0 0 9px #0cabdd,
+                0 0 11px #0cabdd,
+                0 0 13px #0cabdd,
+                0 0 15px #0cabdd
+    }
 }

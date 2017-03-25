@@ -3,24 +3,38 @@
  */
 'use strict';
 
-var express = require('express');
-var ffmeta = require('ffmetadata');
-var path = require('path');
-var ws = require('ws');
+const express = require('express');
+const ffmeta = require('ffmetadata');
+const fs = require('fs-extra');
+const mongoose = require('mongoose');
+const path = require('path');
+const ws = require('ws');
 
-var mplayer = require('./lib/mplayer');
-var enums = require('./common/enums.js');
+const mplayer = require('./lib/mplayer');
+const enums = require('./common/enums.js');
 
-var PlayStateEnum = enums.PlayStateEnum;
-var CommandEnum = enums.CommandEnum;
+const PlayStateEnum = enums.PlayStateEnum;
+const CommandEnum = enums.CommandEnum;
 
-var app = express();
+const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/common', express.static(path.join(__dirname, 'common')));
 
+let config = {};
+try {
+    if (process.argv[2]) {
+        config = fs.readFileSync(process.argv[2]);
+    } else {
+        config = fs.readFileSync(path.join(__dirname, 'default-config.json'));
+    }
+} catch (e) {
+    console.error('Could not read the config file!', e);
+    process.exit(1);
+}
+
 // globals
-var nowplaying = {
+const nowplaying = {
     time: {
         total: 0,
         current: 0
@@ -31,11 +45,10 @@ var nowplaying = {
     artist: null,
     album: null,
     filename: null,
-    upnext: null,
-    playlist: null
+    context: null
 };
-var wsServer = new ws.Server({ port: 1777, path: '/ws' });
-var player = new mplayer();
+const wsServer = new ws.Server({ port: 1777, path: '/ws' });
+const player = new mplayer();
 
 wsServer.broadcast = function (data) {
     data = typeof data === 'string' ? data : JSON.stringify(data);
@@ -43,7 +56,7 @@ wsServer.broadcast = function (data) {
         .forEach(client => client.send(data));
 };
 
-var updatePlaystate = function (state) {
+const updatePlaystate = function (state) {
     nowplaying.playstate = state;
     wsServer.broadcast(nowplaying);
 };
@@ -61,8 +74,10 @@ player.on('time', time => nowplaying.time.current = time);
 
 wsServer.on('connection', function (websocket) {
 
+    wsServer.broadcast(nowplaying);
+
     websocket.on('message', function (msg) {
-        var message = {};
+        let message = {};
         try {
             message = JSON.parse(msg);
         } catch (e) {
@@ -74,8 +89,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                      player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                    //player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                      // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();
@@ -97,6 +112,10 @@ wsServer.on('connection', function (websocket) {
     });
 });
 
-setInterval(() => { wsServer.broadcast(nowplaying) }, 1000);
+setInterval(() => {
+    if (nowplaying.playstate === PlayStateEnum.PLAYING) {
+        wsServer.broadcast(nowplaying);
+    }
+}, 1000);
 
 app.listen(8080, () => console.log('server started'));

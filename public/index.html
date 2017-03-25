@@ -2,37 +2,65 @@
 <html lang="en" ng-app="n.audio">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>n.audio</title>
 
     <link rel="stylesheet" href="lib/vendor/material/angular-material.min.css">
     <link rel="stylesheet" href="lib/vendor/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="lib/slider/slider.css">
+    <link rel="stylesheet" href="lib/popover/ngPopover.css">
     <link rel="stylesheet" href="assets/naudio.css">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-<div>
-    Websocket Connected: {{TEST_WS_CONNECTED}}
-</div>
-<button ng-click="togglePlaystate()">Play/Pause</button>
-<button ng-click="randomVolume()">Random Volume</button>
-<br>
-{{nowplaying | json}}
+<div class="main">
+    <div class="content">
+        <button ng-click="randomVolume()">Random Volume</button>
+        <br>
+        {{nowplaying | json}}
 
-<n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
-<div class="control-container">
-    <div class="previous-control" ng-click="changePrevious()">
-        <i class="fa fa-2x fa-fw fa-step-backward"></i>
-    </div>
-    <div class="playstate-control" ng-click="togglePlaystate()">
-        <i class="fa fa-3x fa-fw"
-           ng-class="{'fa-pause': nowplaying.playstate === PlayStateEnum.PLAYING,
-                      'fa-play': nowplaying.playstate !== PlayStateEnum.PLAYING,
-                      'play-adjust': nowplaying.playstate !== PlayStateEnum.PLAYING}"></i>
-    </div>
-    <div class="next-control" ng-click="changeNext()">
-        <i class="fa fa-2x fa-fw fa-step-forward"></i>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+
     </div>
 </div>
+
+<footer class="sticky-footer">
+    <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
+    <div class="control-wrapper" layout="row" layout-align="space-around">
+        <div class="control-container">
+            <div class="previous-control" ng-click="changePrevious()">
+                <i class="fa fa-fw fa-step-backward"></i>
+            </div>
+            <div class="playstate-control" ng-click="togglePlaystate()">
+                <i class="fa fa-3x fa-fw"
+                   ng-class="{'fa-pause': nowplaying.playstate === PlayStateEnum.PLAYING,
+                              'fa-play': nowplaying.playstate !== PlayStateEnum.PLAYING,
+                              'play-adjust': nowplaying.playstate !== PlayStateEnum.PLAYING}"></i>
+            </div>
+            <div class="next-control" ng-click="changeNext()">
+                <i class="fa fa-fw fa-step-forward"></i>
+            </div>
+        </div>
+        <i id="volumeButton" class="fa fa-github ng-popover-trigger" style="margin: 10px 50px"></i>
+    </div>
+</footer>
+
+<div class="ws-indicator" ng-class="{'failed': !wsConnected}"></div>
+
+<ng-popover trigger="volumeButton" direction="top">
+    <md-slider ng-model="volSlider" min="0" max="100" md-vertical></md-slider>
+</ng-popover>
 
 <!-- jquery -->
 <script src="lib/vendor/jquery/jquery.min.js"></script>
@@ -53,6 +81,7 @@
 <!-- other lib -->
 <script src="lib/websocket.js"></script>
 <script src="lib/slider/slider.js"></script>
+<script src="lib/popover/ngPopover.js"></script>
 <script src="../common/enums.js"></script>
 
 <!-- app -->

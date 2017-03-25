@@ -9,18 +9,18 @@
  */
 
 angular.module('ngWebsocket', []).service('$websocket', [function () {
-    var self = this;
-    var defaultConfig = {
+    const self = this;
+    const defaultConfig = {
         url: null,
         reconnect: true,
         reconnectInterval: 1000,
         maxReconnectInterval: 300000,
         doubleInterval: true,
-        reconnectFn: null,
+        reconnectFn: function () { return true },
         protocols: null,
         immediate: true
     };
-    var wsRegistry = {};
+    const wsRegistry = {};
 
     self.CONNECTING = 0;
     self.OPEN = 1;
@@ -35,19 +35,19 @@ angular.module('ngWebsocket', []).service('$websocket', [function () {
      * @private
      */
     function _websocket(config) {
-        var sock = this;
-        var events = {};
-        var websocket = null;
-        var reconnectIntervalId = null;
-        var interval = config.reconnectInterval;
+        let sock = this;
+        let events = {};
+        let websocket = null;
+        let reconnectIntervalId = null;
+        let interval = config.reconnectInterval;
 
-        var fireEvent = function fireEvent(event, data) {
+        let fireEvent = function fireEvent(event, data) {
             (events[event] || []).forEach(function (listener) {
                 listener(data);
             });
         };
 
-        var init = function init() {
+        let init = function init() {
             websocket = config.protocols ? new WebSocket(config.url, config.protocols) : new WebSocket(config.url);
 
             websocket.onmessage = function (message) {
@@ -196,7 +196,7 @@ angular.module('ngWebsocket', []).service('$websocket', [function () {
      */
     self.$new = function (config) {
         config = angular.merge({}, defaultConfig, typeof config === 'string' ? { url: config } : config || {});
-        var w = self.$get(config.url);
+        let w = self.$get(config.url);
         if (!w) {
             w = new _websocket(config);
             wsRegistry[config.url] = w;
