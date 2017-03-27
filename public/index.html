@@ -14,7 +14,6 @@
 <body ng-controller="n.audio.controller.main" ng-cloak>
 <div class="main">
     <div class="content">
-        <button ng-click="randomVolume()">Random Volume</button>
         <br>
         {{nowplaying | json}}
 
@@ -52,15 +51,11 @@
                 <i class="fa fa-fw fa-step-forward"></i>
             </div>
         </div>
-        <i id="volumeButton" class="fa fa-github ng-popover-trigger" style="margin: 10px 50px"></i>
+        <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100"></md-slider>
     </div>
 </footer>
 
 <div class="ws-indicator" ng-class="{'failed': !wsConnected}"></div>
-
-<ng-popover trigger="volumeButton" direction="top">
-    <md-slider ng-model="volSlider" min="0" max="100" md-vertical></md-slider>
-</ng-popover>
 
 <!-- jquery -->
 <script src="lib/vendor/jquery/jquery.min.js"></script>

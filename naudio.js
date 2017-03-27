@@ -105,6 +105,7 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_VOLUME:
                 player.volume(message.data);
                 nowplaying.volume = message.data;
+                // TODO: reset playstate
                 break;
             default:
                 break;

@@ -66,6 +66,35 @@ app.controller('n.audio.controller.main', [
                 total: 0
             }
         };
+        $scope.volumeSlider = 100;
+
+        const debounce = function (func, wait, immediate) {
+            let timeout;
+            return function() {
+                let context = this;
+                let args = arguments;
+                let later = function() {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                };
+                let callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func.apply(context, args);
+            };
+        };
+
+        $scope.$watch('volumeSlider', debounce(function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                naudio.cmd({ command: $scope.CommandEnum.SET_VOLUME, data: Math.floor(newVal) });
+            }
+        }, 250));
+
+        $scope.$watch('nowplaying.volume', function (newVal) {
+            if ($scope.volumeSlider !== newVal) {
+                $scope.volumeSlider = newVal;
+            }
+        });
 
         $rootScope.$on('ws.open', function () {
             $scope.wsConnected = true;
@@ -92,20 +121,10 @@ app.controller('n.audio.controller.main', [
             naudio.cmd({ command: $scope.CommandEnum.SEEK_TO, data: percent });
         };
 
-        // TODO///////////////////////////
-        // TODO    Start Test Area    ////
-        // TODO///////////////////////////
         $scope.togglePlaystate = function () {
             let newState = ($scope.nowplaying || {}).playstate === $scope.PlayStateEnum.PLAYING ? $scope.PlayStateEnum.PAUSED : $scope.PlayStateEnum.PLAYING;
             naudio.cmd({ command: $scope.CommandEnum.SET_PLAYSTATE, data: newState });
         };
-
-        $scope.randomVolume = function () {
-            naudio.cmd({ command: $scope.CommandEnum.SET_VOLUME, data: Math.floor(Math.random() * 100) });
-        };
-        // TODO///////////////////////////
-        // TODO     End Test Area     ////
-        // TODO///////////////////////////
 
         naudio.connect();
     }

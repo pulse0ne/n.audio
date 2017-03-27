@@ -106,6 +106,20 @@ body {
     animation: pulse-red 1.5s ease-in-out infinite alternate;
 }
 
+md-slider.vol-slider {
+    margin: 0 10px;
+}
+
+md-slider.vol-slider .md-track.md-track-fill {
+    /*background-color: #ff5573;*/
+    background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
+}
+
+md-slider.md-default-theme .md-thumb:after, md-slider .md-thumb:after {
+    background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
+    border-color: #ff5573;
+}
+
 @keyframes pulse-red {
     from {
         box-shadow:
