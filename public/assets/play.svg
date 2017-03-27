@@ -1,0 +1,16 @@
+<svg class="svg-control clickable" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ff843e;stop-opacity:1"></stop>
+            <stop offset="50%" style="stop-color:#ff5573;stop-opacity:1"></stop>
+            <stop offset="100%" style="stop-color:#ff62c4;stop-opacity:1"></stop>
+        </linearGradient>
+        <linearGradient id="hover" x1="100%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" style="stop-color:#ff843e;stop-opacity:1"></stop>
+            <stop offset="50%" style="stop-color:#ff5573;stop-opacity:1"></stop>
+            <stop offset="100%" style="stop-color:#ff62c4;stop-opacity:1"></stop>
+        </linearGradient>
+    </defs>
+
+    <path id="control" d="{{svgPath}}" fill="url(#grad)"></path>
+</svg>

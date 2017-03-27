@@ -67,6 +67,7 @@ app.controller('n.audio.controller.main', [
             }
         };
         $scope.volumeSlider = 100;
+        $scope.svgPath = 'M 0 0 L 0 32 L 32 16 z';
 
         const debounce = function (func, wait, immediate) {
             let timeout;
@@ -93,6 +94,14 @@ app.controller('n.audio.controller.main', [
         $scope.$watch('nowplaying.volume', function (newVal) {
             if ($scope.volumeSlider !== newVal) {
                 $scope.volumeSlider = newVal;
+            }
+        });
+
+        $scope.$watch('nowplaying.playstate', function (newVal) {
+            if (newVal !== $scope.PlayStateEnum.PLAYING) {
+                $scope.svgPath = 'M 0 0 L 0 32 L 32 16 z';
+            } else {
+                $scope.svgPath = 'M 2 0 L 2 32 L 12 32 L 12 0 L 2 0 M 20 0 L 20 32 L 30 32 L 30 0 L 20 0';
             }
         });
 

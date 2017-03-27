@@ -6,6 +6,7 @@
 const express = require('express');
 const ffmeta = require('ffmetadata');
 const fs = require('fs-extra');
+const klaw = require('klaw');
 const mongoose = require('mongoose');
 const path = require('path');
 const ws = require('ws');
@@ -16,7 +17,12 @@ const enums = require('./common/enums.js');
 const PlayStateEnum = enums.PlayStateEnum;
 const CommandEnum = enums.CommandEnum;
 
+// db models
+const models = require('./models');
+
 const app = express();
+
+const audioCodecs = ['mp3', 'aac', 'wma', 'wav', 'alac', 'flac', 'ogg'];
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/common', express.static(path.join(__dirname, 'common')));
@@ -40,7 +46,7 @@ const nowplaying = {
         current: 0
     },
     playstate: PlayStateEnum.STOPPED,
-    volume: 0,
+    volume: 50,
     title: null,
     artist: null,
     album: null,
@@ -72,6 +78,30 @@ player.on('pause', () => updatePlaystate(PlayStateEnum.PAUSED));
 player.on('stop', () => updatePlaystate(PlayStateEnum.STOPPED));
 player.on('time', time => nowplaying.time.current = time);
 
+const scanDirectory = function (dir, errCb) {
+    fs.access(dir, fs.constants.R_OK, (err) => {
+        if (err) {
+            console.error('Could not scan directory. Does it exist?', dir);
+            errCb(err);
+        } else {
+            klaw(dir)
+                .on('data', item => {
+                    let parts = item.path.split('.');
+                    if (!item.stats.isDirectory() && audioCodecs.indexOf(parts[parts.length - 1]) > -1) {
+                        console.log(item.path);
+                        // TODO make db entries as needed
+                    }
+                }).on('end', () => {
+
+                }).on('error', (e, item) => {
+
+                });
+        }
+    });
+};
+
+scanDirectory('/home/tsned/Documents/Perturbator', () => {});
+
 wsServer.on('connection', function (websocket) {
 
     wsServer.broadcast(nowplaying);
@@ -89,8 +119,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                      // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                       player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    //player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();
@@ -103,9 +133,13 @@ wsServer.on('connection', function (websocket) {
                 player.seekPercent(message.data);
                 break;
             case CommandEnum.SET_VOLUME:
+                let currentPlaystate = nowplaying.playstate;
                 player.volume(message.data);
                 nowplaying.volume = message.data;
-                // TODO: reset playstate
+                // TODO: this is ugly...need to have a smart queue or something
+                if (currentPlaystate !== PlayStateEnum.PLAYING) {
+                    setTimeout(() => player.pause(), 100);
+                }
                 break;
             default:
                 break;

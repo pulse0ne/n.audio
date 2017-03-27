@@ -12,74 +12,59 @@
     <link rel="stylesheet" href="assets/naudio.css">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-<div class="main">
-    <div class="content">
-        <br>
-        {{nowplaying | json}}
-
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-
-    </div>
-</div>
-
-<footer class="sticky-footer">
-    <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
-    <div class="control-wrapper" layout="row" layout-align="space-around">
-        <div class="control-container">
-            <div class="previous-control" ng-click="changePrevious()">
-                <i class="fa fa-fw fa-step-backward"></i>
-            </div>
-            <div class="playstate-control" ng-click="togglePlaystate()">
-                <i class="fa fa-3x fa-fw"
-                   ng-class="{'fa-pause': nowplaying.playstate === PlayStateEnum.PLAYING,
-                              'fa-play': nowplaying.playstate !== PlayStateEnum.PLAYING,
-                              'play-adjust': nowplaying.playstate !== PlayStateEnum.PLAYING}"></i>
-            </div>
-            <div class="next-control" ng-click="changeNext()">
-                <i class="fa fa-fw fa-step-forward"></i>
-            </div>
+    <div class="main">
+        <div>
+            {{nowplaying | json}}
         </div>
+
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+        <h1>Thing</h1><br>
+    </div>
+
+    <div class="sticky-footer" layout="row" layout-align="space-around center">
+        <div class="control-container">
+            <div class="clickable" ng-include="'assets/play.svg'" ng-click="togglePlaystate()"></div>
+        </div>
+        <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
         <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100"></md-slider>
     </div>
-</footer>
 
-<div class="ws-indicator" ng-class="{'failed': !wsConnected}"></div>
+    <div class="ws-indicator" ng-class="{'failed': !wsConnected}"></div>
 
-<!-- jquery -->
-<script src="lib/vendor/jquery/jquery.min.js"></script>
+    <!-- jquery -->
+    <script src="lib/vendor/jquery/jquery.min.js"></script>
 
-<!-- angular -->
-<script src="lib/vendor/angular/angular.min.js"></script>
-<script src="lib/vendor/angular/angular-aria.min.js"></script>
-<script src="lib/vendor/angular/angular-animate.min.js"></script>
-<script src="lib/vendor/angular/angular-resource.min.js"></script>
-<script src="lib/vendor/angular/angular-route.min.js"></script>
+    <!-- angular -->
+    <script src="lib/vendor/angular/angular.min.js"></script>
+    <script src="lib/vendor/angular/angular-aria.min.js"></script>
+    <script src="lib/vendor/angular/angular-animate.min.js"></script>
+    <script src="lib/vendor/angular/angular-resource.min.js"></script>
+    <script src="lib/vendor/angular/angular-route.min.js"></script>
 
-<!-- material -->
-<script src="lib/vendor/material/angular-material.min.js"></script>
+    <!-- material -->
+    <script src="lib/vendor/material/angular-material.min.js"></script>
 
-<!-- moment -->
-<script src="lib/vendor/moment/moment.min.js"></script>
+    <!-- moment -->
+    <script src="lib/vendor/moment/moment.min.js"></script>
 
-<!-- other lib -->
-<script src="lib/websocket.js"></script>
-<script src="lib/slider/slider.js"></script>
-<script src="lib/popover/ngPopover.js"></script>
-<script src="../common/enums.js"></script>
+    <!-- other lib -->
+    <script src="lib/websocket.js"></script>
+    <script src="lib/slider/slider.js"></script>
+    <script src="lib/popover/ngPopover.js"></script>
+    <script src="../common/enums.js"></script>
 
-<!-- app -->
-<script src="app.js"></script>
+    <!-- app -->
+    <script src="app.js"></script>
 </body>
 </html>

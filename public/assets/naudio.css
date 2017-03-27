@@ -3,6 +3,11 @@ body {
     background: #272822;
     color: #eeeeee;
     height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
     margin: 0;
 }
 
@@ -10,54 +15,24 @@ body {
     box-sizing: border-box;
 }
 
+.svg-control {
+    width: 24px;
+    height: 24px;
+    margin: 5px;
+}
+
+.svg-control:hover #control,
+.svg-control:active #control {
+    fill: url(#hover);
+}
+
 .clickable {
     cursor: pointer;
 }
-
-.playstate-control {
-    width: 75px;
-    height: 75px;
-}
-
-.previous-control,
-.next-control {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5em;
-}
-
-.playstate-control,
-.previous-control,
-.next-control {
-    border-radius: 50%;
-    border: 3px solid #eeeeee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin: 0 8px;
-}
-
-.playstate-control:hover,
-.previous-control:hover,
-.next-control:hover {
-    border-color: #ff5573;
-}
-
-.playstate-control,
-.playstate-control:active,
-.playstate-control:focus,
-.previous-control,
-.previous-control:active,
-.previous-control:focus,
-.next-control,
-.next-control:active,
-.next-control:focus {
+.clickable,
+.clickable:active,
+.clickable:focus {
     outline: none;
-}
-
-.play-adjust {
-    padding-left: 6px;
 }
 
 .control-container {
@@ -67,32 +42,20 @@ body {
 }
 
 .main {
-    min-height: 100%;
-}
-
-.content {
-    padding: 5px;
-    padding-bottom: 120px;
+    flex: 1;
+    overflow: auto;
 }
 
 .sticky-footer {
     background: #272822;
     border-top: 1px solid #444444;
-    height: 120px;
-    margin-top: -120px;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
 }
 
 .ws-indicator {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    top: 0;
     margin: 8px;
     width: 8px;
     height: 8px;
