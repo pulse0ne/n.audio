@@ -15,6 +15,16 @@ const trackSchema = Schema({
     playcount: Number
 });
 
+trackSchema.pre('save', (next) => {
+    let now = new Date();
+
+    if (!this.dateAdded) {
+        this.dateAdded = now;
+    }
+
+    next();
+});
+
 const Track = mongoose.model('Track', trackSchema);
 
 module.exports = Track;

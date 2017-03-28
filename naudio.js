@@ -18,7 +18,10 @@ const PlayStateEnum = enums.PlayStateEnum;
 const CommandEnum = enums.CommandEnum;
 
 // db models
-const models = require('./models');
+const Track = require('./models/track');
+const Album = require('./models/album');
+const Artist = require('./models/artist');
+const Playlist = require('./models/playlist');
 
 const app = express();
 
@@ -30,14 +33,16 @@ app.use('/common', express.static(path.join(__dirname, 'common')));
 let config = {};
 try {
     if (process.argv[2]) {
-        config = fs.readFileSync(process.argv[2]);
+        config = JSON.parse(fs.readFileSync(process.argv[2]));
     } else {
-        config = fs.readFileSync(path.join(__dirname, 'default-config.json'));
+        config = JSON.parse(fs.readFileSync(path.join(__dirname, 'default-config.json')));
     }
 } catch (e) {
     console.error('Could not read the config file!', e);
     process.exit(1);
 }
+
+mongoose.connect(config.dbUrl, { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } });
 
 // globals
 const nowplaying = {
@@ -84,15 +89,40 @@ const scanDirectory = function (dir, errCb) {
             console.error('Could not scan directory. Does it exist?', dir);
             errCb(err);
         } else {
+            let count = 0;
             klaw(dir)
                 .on('data', item => {
                     let parts = item.path.split('.');
                     if (!item.stats.isDirectory() && audioCodecs.indexOf(parts[parts.length - 1]) > -1) {
-                        console.log(item.path);
-                        // TODO make db entries as needed
+                        count += 1;
+                        Track.findOne({ filename: item.path }, (err, track) => {
+                            if (!err && !track) {
+                                ffmeta.read(item.path, (err, metadata) => {
+                                    if (!err) {
+                                        let filenameParts = item.path.split('/');
+                                        let newTrack = Track({
+                                            artist: metadata.artist,
+                                            album: metadata.album,
+                                            name: metadata.title,
+                                            filename: filenameParts[filenameParts.length - 1],
+                                            diskLocation: item.path,
+                                            playcount: 0,
+                                            trackNum: metadata.track.split('/')[0]
+                                        });
+
+                                        newTrack.save((err, saved) => {
+                                            if (saved.album) {
+                                                // TODO create album and reference this
+                                            }
+                                            // TODO create artist and reference album or this
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
                 }).on('end', () => {
-
+                    console.log('Found ' + count + ' tracks');
                 }).on('error', (e, item) => {
 
                 });
@@ -100,7 +130,7 @@ const scanDirectory = function (dir, errCb) {
     });
 };
 
-scanDirectory('/home/tsned/Documents/Perturbator', () => {});
+scanDirectory('/home/tsned/Music', () => {});
 
 wsServer.on('connection', function (websocket) {
 
