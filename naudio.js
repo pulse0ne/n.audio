@@ -42,7 +42,11 @@ try {
     process.exit(1);
 }
 
+mongoose.Promise = global.Promise;
 mongoose.connect(config.dbUrl, { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } });
+
+// TODO: for testing only
+Track.remove({}, () => {});
 
 // globals
 const nowplaying = {
@@ -111,8 +115,9 @@ const scanDirectory = function (dir, errCb) {
                                         });
 
                                         newTrack.save((err, saved) => {
-                                            if (saved.album) {
+                                            if (!err && saved.album) {
                                                 // TODO create album and reference this
+                                                console.log('Saved track ' + saved.name);
                                             }
                                             // TODO create artist and reference album or this
                                         });

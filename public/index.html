@@ -10,37 +10,34 @@
     <link rel="stylesheet" href="lib/slider/slider.css">
     <link rel="stylesheet" href="lib/popover/ngPopover.css">
     <link rel="stylesheet" href="assets/naudio.css">
+
+    <base href="/">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-    <div class="main">
+    <div ng-show="!idleScreen" class="main">
         <div>
             {{nowplaying | json}}
         </div>
 
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
-        <h1>Thing</h1><br>
+        <h1 ng-repeat="a in TEST">Thing {{a}}<br></h1>
     </div>
 
-    <div class="sticky-footer" layout="row" layout-align="space-around center">
-        <div class="control-container">
-            <div class="clickable" ng-include="'assets/play.svg'" ng-click="togglePlaystate()"></div>
+    <div ng-show="idleScreen" class="main">
+        STUFF
+    </div>
+
+    <div class="sticky-footer" layout="column">
+        <div class="top-row" layout="row" layout-align="space-around center">
+            <div class="control-container">
+                <div class="clickable" ng-include="'assets/play.svg'" ng-click="togglePlaystate()"></div>
+            </div>
+            <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
+            <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100" aria-label="volume"></md-slider>
         </div>
-        <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
-        <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100"></md-slider>
+        <div class="bottom-row" layout="row" layout-align="space-around center">
+            More Controls
+        </div>
     </div>
-
-    <div class="ws-indicator" ng-class="{'failed': !wsConnected}"></div>
 
     <!-- jquery -->
     <script src="lib/vendor/jquery/jquery.min.js"></script>
@@ -62,6 +59,7 @@
     <script src="lib/websocket.js"></script>
     <script src="lib/slider/slider.js"></script>
     <script src="lib/popover/ngPopover.js"></script>
+    <script src="lib/ngIdle.js"></script>
     <script src="../common/enums.js"></script>
 
     <!-- app -->
