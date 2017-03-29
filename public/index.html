@@ -14,18 +14,9 @@
     <base href="/">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-    <ng-view class="main"></ng-view>
-    <!--<div ng-show="!idleScreen" class="main">-->
-        <!--<div>-->
-            <!--{{nowplaying | json}}-->
-        <!--</div>-->
-
-        <!--<h1 ng-repeat="a in TEST">Thing {{a}}<br></h1>-->
-    <!--</div>-->
-
-    <!--<div ng-show="idleScreen" class="main">-->
-        <!--STUFF-->
-    <!--</div>-->
+    <div class="main">
+        <div ng-view class="view {{viewClass}}"></div>
+    </div>
 
     <div class="sticky-footer" layout="column">
         <div class="top-row" layout="row" layout-align="space-around center">
@@ -65,5 +56,7 @@
 
     <!-- app -->
     <script src="app.js"></script>
+    <script src="views/nav/nav.js"></script>
+    <script src="views/idle/idle.js"></script>
 </body>
 </html>

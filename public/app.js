@@ -13,10 +13,23 @@
         'n.audio.track.slider'
     ]);
 
+    app.constant('SVGs', {
+        play: 'M 0 0 L 0 32 L 32 16 z',
+        pause: 'M 2 0 L 2 32 L 12 32 L 12 0 L 2 0 M 20 0 L 20 32 L 30 32 L 30 0 L 20 0'
+    });
+
     app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-        $routeProvider.when('/', { templateUrl: 'views/nav.html' });
-        $routeProvider.when('/now-playing', { templateUrl: 'views/idle.html' });
-        $routeProvider.otherwise({ redirectTo: '/' });
+        $routeProvider.when('/', {
+            templateUrl: 'views/nav/nav.html',
+            controller: 'n.audio.controller.nav'
+        });
+        $routeProvider.when('/idle', {
+            templateUrl: 'views/idle/idle.html',
+            controller: 'n.audio.controller.idle'
+        });
+        $routeProvider.otherwise({
+            redirectTo: '/'
+        });
 
         $locationProvider.html5Mode(true);
     }]);
@@ -42,19 +55,19 @@
 
             ws.$on('$message', function (message) {
                 message = JSON.parse(message);
-                $rootScope.$emit('ws.message', message);
+                $rootScope.$broadcast('ws.message', message);
             });
 
             ws.$on('$open', function () {
-                $rootScope.$emit('ws.open');
+                $rootScope.$broadcast('ws.open');
             });
 
             ws.$on('$close', function (code) {
-                $rootScope.$emit('ws.close', code);
+                $rootScope.$broadcast('ws.close', code);
             });
 
             ws.$on('$error', function () {
-                $rootScope.$emit('ws.error');
+                $rootScope.$broadcast('ws.error');
             });
 
             self.connect = ws.$open;
@@ -63,12 +76,12 @@
 
     app.controller('n.audio.controller.main', [
         '$scope',
-        '$rootScope',
         '$timeout',
         '$location',
         'ngIdle',
         'n.audio.service',
-        function ($scope, $rootScope, $timeout, $location, ngIdle, naudio) {
+        'SVGs',
+        function ($scope, $timeout, $location, ngIdle, naudio, svg) {
             $scope.CommandEnum = (window.enums || {}).CommandEnum || {};
             $scope.PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
             $scope.wsConnected = false;
@@ -80,8 +93,7 @@
                 }
             };
             $scope.volumeSlider = 100;
-            $scope.svgPath = 'M 0 0 L 0 32 L 32 16 z';
-
+            $scope.svgPath = svg.play;
 
             // TODO
             $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
@@ -118,35 +130,16 @@
             });
 
             $scope.$watch('nowplaying.playstate', function (newVal) {
-                if (newVal !== $scope.PlayStateEnum.PLAYING) {
-                    $scope.svgPath = 'M 0 0 L 0 32 L 32 16 z';
-                } else {
-                    $scope.svgPath = 'M 2 0 L 2 32 L 12 32 L 12 0 L 2 0 M 20 0 L 20 32 L 30 32 L 30 0 L 20 0';
-                }
+                $scope.svgPath = newVal !== $scope.PlayStateEnum.PLAYING ? svg.play : svg.pause;
             });
 
             $scope.$on('ngIdle', function () {
                 console.log('ngIdle fired');
-                $location.path('/now-playing');
-            });
-
-            $rootScope.$on('ws.open', function () {
-                $scope.wsConnected = true;
-                $scope.$apply();
-            });
-
-            $rootScope.$on('ws.error', function () {
-                $scope.wsConnected = false;
-                $scope.$apply();
-            });
-
-            $rootScope.$on('ws.close', function () {
-                $scope.wsConnected = false;
-                $scope.$apply();
+                $location.path('/idle');
             });
 
             // TODO: handle multiple message types
-            $rootScope.$on('ws.message', function (evt, msg) {
+            $scope.$on('ws.message', function (evt, msg) {
                 angular.merge($scope.nowplaying, msg);
                 $scope.$apply();
             });

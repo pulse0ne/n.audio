@@ -37,7 +37,7 @@
             }
         };
 
-        $document.on('keydown keypress mousemove click wheel select touchstart touchmove', function () {
+        $document.on('keydown keypress mousemove mousedown click wheel select touchstart touchmove', function () {
             count = 0;
             idled = false;
         });

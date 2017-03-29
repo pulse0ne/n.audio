@@ -67,7 +67,7 @@ angular.module('ngWebsocket', []).service('$websocket', [function () {
             };
 
             websocket.onclose = function (close) {
-                if (config.reconnect && config.reconnectFn && config.reconnectFn(close.code)) {
+                if (config.reconnect && (!config.reconnectFn || config.reconnectFn(close.code))) {
                     interval = config.doubleInterval ? Math.min(interval * 2, config.maxReconnectInterval) : interval;
                     reconnectIntervalId = setInterval(function () {
                         if (sock.$status() === self.CLOSED) {
