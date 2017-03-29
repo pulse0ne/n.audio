@@ -111,13 +111,13 @@ const scanDirectory = function (dir, errCb) {
                                             filename: filenameParts[filenameParts.length - 1],
                                             diskLocation: item.path,
                                             playcount: 0,
-                                            trackNum: metadata.track.split('/')[0]
+                                            trackNum: (metadata.track || '').split('/')[0]
                                         });
 
                                         newTrack.save((err, saved) => {
                                             if (!err && saved.album) {
                                                 // TODO create album and reference this
-                                                console.log('Saved track ' + saved.name);
+                                                // console.log('Saved track ' + saved.name);
                                             }
                                             // TODO create artist and reference album or this
                                         });
@@ -135,7 +135,7 @@ const scanDirectory = function (dir, errCb) {
     });
 };
 
-scanDirectory('/home/tsned/Music', () => {});
+scanDirectory('/home/tsned/Music/Perturbator', () => {});
 
 wsServer.on('connection', function (websocket) {
 
@@ -154,8 +154,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                       player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                    //player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                       // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();
@@ -187,5 +187,9 @@ setInterval(() => {
         wsServer.broadcast(nowplaying);
     }
 }, 1000);
+
+app.all('*', function (req, res) {
+    res.redirect('/');
+});
 
 app.listen(8080, () => console.log('server started'));

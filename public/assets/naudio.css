@@ -46,6 +46,16 @@ body {
     overflow: auto;
 }
 
+.main.ng-enter {
+    animation: fade-in 1s both ease-in;
+    z-index: 8888;
+}
+
+.main.ng-leave {
+    /*animation: fade-out 1s both ease-out;*//* TODO: this doesn't work*/
+    z-index: 9999;
+}
+
 .sticky-footer {
     background: #272822;
     border-top: 1px solid #444444;
@@ -63,4 +73,14 @@ md-slider.vol-slider .md-track.md-track-fill {
 md-slider.md-default-theme .md-thumb:after, md-slider .md-thumb:after {
     background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
     border-color: #ff5573;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }

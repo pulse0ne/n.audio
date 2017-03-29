@@ -14,17 +14,18 @@
     <base href="/">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-    <div ng-show="!idleScreen" class="main">
-        <div>
-            {{nowplaying | json}}
-        </div>
+    <ng-view class="main"></ng-view>
+    <!--<div ng-show="!idleScreen" class="main">-->
+        <!--<div>-->
+            <!--{{nowplaying | json}}-->
+        <!--</div>-->
 
-        <h1 ng-repeat="a in TEST">Thing {{a}}<br></h1>
-    </div>
+        <!--<h1 ng-repeat="a in TEST">Thing {{a}}<br></h1>-->
+    <!--</div>-->
 
-    <div ng-show="idleScreen" class="main">
-        STUFF
-    </div>
+    <!--<div ng-show="idleScreen" class="main">-->
+        <!--STUFF-->
+    <!--</div>-->
 
     <div class="sticky-footer" layout="column">
         <div class="top-row" layout="row" layout-align="space-around center">

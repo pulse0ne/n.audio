@@ -14,8 +14,8 @@
     ]);
 
     app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-        $routeProvider.when('/', { templateUrl: 'nav.html', controller: 'n.audio.controller.main' });
-        $routeProvider.when('/now-playing', { templateUrl: 'idle.html', controller: 'n.audio.controller.main'});
+        $routeProvider.when('/', { templateUrl: 'views/nav.html' });
+        $routeProvider.when('/now-playing', { templateUrl: 'views/idle.html' });
         $routeProvider.otherwise({ redirectTo: '/' });
 
         $locationProvider.html5Mode(true);
@@ -65,9 +65,10 @@
         '$scope',
         '$rootScope',
         '$timeout',
+        '$location',
         'ngIdle',
         'n.audio.service',
-        function ($scope, $rootScope, $timeout, ngIdle, naudio) {
+        function ($scope, $rootScope, $timeout, $location, ngIdle, naudio) {
             $scope.CommandEnum = (window.enums || {}).CommandEnum || {};
             $scope.PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
             $scope.wsConnected = false;
@@ -80,11 +81,11 @@
             };
             $scope.volumeSlider = 100;
             $scope.svgPath = 'M 0 0 L 0 32 L 32 16 z';
-            $scope.idleScreen = false;
 
 
             // TODO
             $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
+            ngIdle.setIdle(5);
             // TODO
 
 
@@ -124,9 +125,9 @@
                 }
             });
 
-            $rootScope.$on('ngIdle', function () {
-                console.log('idled!');
-                $scope.idleScreen = true;
+            $scope.$on('ngIdle', function () {
+                console.log('ngIdle fired');
+                $location.path('/now-playing');
             });
 
             $rootScope.$on('ws.open', function () {

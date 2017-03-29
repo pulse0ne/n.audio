@@ -30,7 +30,7 @@
                 interval = $interval(function () {
                     count += options.checkInterval;
                     if (count > options.idle && !idled) {
-                        $rootScope.$emit('ngIdle');
+                        $rootScope.$broadcast('ngIdle');
                         idled = true;
                     }
                 }, options.checkInterval * 1000);
