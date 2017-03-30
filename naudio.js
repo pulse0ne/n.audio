@@ -19,8 +19,6 @@ const CommandEnum = enums.CommandEnum;
 
 // db models
 const Track = require('./models/track');
-const Album = require('./models/album');
-const Artist = require('./models/artist');
 const Playlist = require('./models/playlist');
 
 const app = express();
@@ -46,7 +44,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect(config.dbUrl, { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } });
 
 // TODO: for testing only
-Track.remove({}, () => {});
+Track.remove({});
 
 // globals
 const nowplaying = {
@@ -94,48 +92,42 @@ const scanDirectory = function (dir, errCb) {
             errCb(err);
         } else {
             let count = 0;
-            klaw(dir)
-                .on('data', item => {
-                    let parts = item.path.split('.');
-                    if (!item.stats.isDirectory() && audioCodecs.indexOf(parts[parts.length - 1]) > -1) {
-                        count += 1;
-                        Track.findOne({ filename: item.path }, (err, track) => {
-                            if (!err && !track) {
-                                ffmeta.read(item.path, (err, metadata) => {
-                                    if (!err) {
-                                        let filenameParts = item.path.split('/');
-                                        let newTrack = Track({
-                                            artist: metadata.artist,
-                                            album: metadata.album,
-                                            name: metadata.title,
-                                            filename: filenameParts[filenameParts.length - 1],
-                                            diskLocation: item.path,
-                                            playcount: 0,
-                                            trackNum: (metadata.track || '').split('/')[0]
-                                        });
+            klaw(dir).on('data', item => {
+                let ext = item.path.split('.').reverse()[0];
+                if (!item.stats.isDirectory() && audioCodecs.indexOf(ext) > -1) {
+                    count += 1;
+                    Track.findOne( { filename: item.path }, (err, track) => {
+                        if (!err && !track) {
+                            ffmeta.read(item.path, (err, metadata) => {
+                                let fnameParts = item.path.split('/');
+                                let newTrack = Track({
+                                    artist: metadata.artist,
+                                    album: metadata.album,
+                                    name: metadata.title,
+                                    filename: fnameParts[fnameParts.length - 1],
+                                    diskLocation: item.path,
+                                    playcount: 0,
+                                    trackNum: (metadata.track || '').split('/')[0]
+                                });
+                                console.log('saving: ' + newTrack.filename);
 
-                                        newTrack.save((err, saved) => {
-                                            if (!err && saved.album) {
-                                                // TODO create album and reference this
-                                                // console.log('Saved track ' + saved.name);
-                                            }
-                                            // TODO create artist and reference album or this
-                                        });
+                                newTrack.save((err) => {
+                                    if (err) {
+                                        console.error(err);
                                     }
                                 });
-                            }
-                        });
-                    }
-                }).on('end', () => {
-                    console.log('Found ' + count + ' tracks');
-                }).on('error', (e, item) => {
-
-                });
+                            });
+                        }
+                    });
+                }
+            }).on('end', () => {
+                console.log('done scanning directory (' + count + ' files)');
+            });
         }
     });
 };
 
-scanDirectory('/home/tsned/Music/Perturbator', () => {});
+scanDirectory('/home/tsned/Music/Saosin', () => {});
 
 wsServer.on('connection', function (websocket) {
 

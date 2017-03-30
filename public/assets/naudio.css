@@ -23,6 +23,7 @@ body {
 
 .svg-control:hover #control,
 .svg-control:active #control {
+    /*noinspection CssUnknownTarget*/
     fill: url(#hover);
 }
 
