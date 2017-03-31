@@ -3,13 +3,16 @@
  */
 'use strict';
 
+const async = require('async');
 const express = require('express');
-const ffmeta = require('ffmetadata');
 const fs = require('fs-extra');
 const klaw = require('klaw');
+const metadata = require('musicmetadata');
 const mongoose = require('mongoose');
 const path = require('path');
 const ws = require('ws');
+
+const EventEmitter = require('events');
 
 const mplayer = require('./lib/mplayer');
 const enums = require('./common/enums.js');
@@ -24,8 +27,7 @@ const Playlist = require('./models/playlist');
 const app = express();
 
 const dbOpts = { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } };
-
-const audioCodecs = ['mp3', 'aac', 'wma', 'wav', 'alac', 'flac', 'ogg'];
+const audioCodecs = ['mp3', 'm4a', 'flac', 'ogg'];
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/common', express.static(path.join(__dirname, 'common')));
@@ -44,8 +46,11 @@ try {
 
 mongoose.Promise = global.Promise;
 const db = mongoose.connect(config.dbUrl, dbOpts);
+/*TODO:remove*/db.then(() => Track.remove({}));
 
-// globals
+class NAudioEmitter extends EventEmitter {}
+
+const emitter = new NAudioEmitter();
 const nowplaying = {
     time: {
         total: 0,
@@ -84,58 +89,68 @@ player.on('pause', () => updatePlaystate(PlayStateEnum.PAUSED));
 player.on('stop', () => updatePlaystate(PlayStateEnum.STOPPED));
 player.on('time', time => nowplaying.time.current = time);
 
+const metadataExtractor = function (item, cb) {
+    let r = fs.createReadStream(item);
+    metadata(r, (err, meta) => {
+        r.close();
+        let fp = item.split('/');
+        let m = {
+            artist: meta.artist[0],
+            album: meta.album,
+            name: meta.title,
+            filename: fp[fp.length - 1],
+            disklocation: item,
+            playcount: 0,
+            year: meta.year,
+            tracknum: (meta.track || {}).no,
+            dateadded: new Date()
+        };
+        return cb(err, m);
+    });
+};
+
+const audioFileFilter = x => !x.stats.isDirectory() && audioCodecs.indexOf(x.path.split('.').reverse()[0]) > -1;
+
 const scanDirectory = function (dir, errCb) {
     fs.access(dir, fs.constants.R_OK, (err) => {
         if (err) {
-            console.error('Could not scan directory. Does it exist?', err);
             errCb(err);
         } else {
-            let count = 0;
+            let files = [];
             klaw(dir).on('data', item => {
-                let ext = item.path.split('.').reverse()[0];
-                if (!item.stats.isDirectory() && audioCodecs.indexOf(ext) > -1) {
-                    count += 1;
-                    Track.findOne( { filename: item.path }, (err, track) => {
-                        if (!err && !track) {
-                            ffmeta.read(item.path, (err, metadata) => {
-                                let fnameParts = item.path.split('/');
-                                let newTrack = Track({
-                                    artist: metadata.artist,
-                                    album: metadata.album,
-                                    name: metadata.title,
-                                    filename: fnameParts[fnameParts.length - 1],
-                                    disklocation: item.path,
-                                    scanroot: dir,
-                                    playcount: 0,
-                                    tracknum: (metadata.track || '').split('/')[0]
-                                });
-                                console.log('saving: ' + newTrack.filename);
-
-                                newTrack.save((err) => {
-                                    if (err) {
-                                        console.error(err);
-                                    }
-                                });
-                            });
-                        }
-                    });
+                if (audioFileFilter(item)) {
+                    files.push(item.path);
                 }
             }).on('end', () => {
-                console.log('done scanning directory (' + count + ' files)');
+                console.log('Found ' + files.length + ' files');
+                let start = Date.now();
+                async.mapLimit(files, 500, metadataExtractor, (err, meta) => {
+                    let dur = (Date.now() - start) / 1000;
+                    console.log('Found metadata for ' + meta.length + ' files');
+                    console.log('Took ' + dur + ' seconds (' + dur / meta.length + ' seconds per file)');
+                    db.then(() => {
+                        let bulk = Track.collection.initializeUnorderedBulkOp();
+                        meta.forEach(r => bulk.find({match: 'disklocation'}).upsert().updateOne(r));
+                        bulk.execute((err, res) => {
+                            console.log('Bulk insert complete. isOk:', res.isOk());
+                            emitter.emit('db.scan.complete');
+                        });
+                    });
+                });
             });
         }
     });
 };
 
-db.then(() => scanDirectory('/home/tsned/Music', () => {}));
+/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Music/Perturbator', () => {}));
 
 wsServer.on('connection', function (websocket) {
 
-    websocket.broadcast({nowplaying: nowplaying});
+    websocket.send(JSON.stringify({nowplaying: nowplaying}));
 
     db.then(() => {
         Track.distinct('artist', function (err, result) {
-            if (!err) websocket.send(result);
+            if (!err) websocket.send(JSON.stringify({ artists: result }));
         });
     });
 

@@ -10,21 +10,15 @@ const trackSchema = Schema({
     tracknum: Number,
     filename: String,
     disklocation: String,
-    scanroot: String,
+    year: String,
     dateadded: Date,
     lastplayed: Date,
     playcount: Number
 });
 
-trackSchema.pre('save', (next) => {
-    let now = new Date();
-
-    if (!this.dateadded) {
-        this.dateadded = now;
-    }
-
-    next();
-});
+trackSchema.methods.updatePlaycount = function () {
+    lastplayed = new Date();
+};
 
 const Track = mongoose.model('Track', trackSchema);
 

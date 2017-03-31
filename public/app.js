@@ -134,13 +134,16 @@
             });
 
             $scope.$on('ngIdle', function () {
-                console.log('ngIdle fired');
-                $location.path('/idle');
+                if ($location.path() !== '/idle') {
+                    console.log('ngIdle fired');
+                    $location.path('/idle');
+                }
             });
 
             // TODO: handle multiple message types
             $scope.$on('ws.message', function (evt, msg) {
-                angular.merge($scope.nowplaying, msg);
+                console.log(JSON.stringify(msg, null, 2));
+                angular.merge($scope.nowplaying, msg.nowplaying);
                 $scope.$apply();
             });
 
