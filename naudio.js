@@ -89,24 +89,27 @@ player.on('pause', () => updatePlaystate(PlayStateEnum.PAUSED));
 player.on('stop', () => updatePlaystate(PlayStateEnum.STOPPED));
 player.on('time', time => nowplaying.time.current = time);
 
-const metadataExtractor = function (item, cb) {
-    let r = fs.createReadStream(item);
-    metadata(r, (err, meta) => {
-        r.close();
-        let fp = item.split('/');
-        let m = {
-            artist: meta.artist[0],
-            album: meta.album,
-            name: meta.title,
-            filename: fp[fp.length - 1],
-            disklocation: item,
-            playcount: 0,
-            year: meta.year,
-            tracknum: (meta.track || {}).no,
-            dateadded: new Date()
-        };
-        return cb(err, m);
-    });
+const metadataExtractor = function (scanRoot) {
+    return function (item, cb) {
+        let r = fs.createReadStream(item);
+        metadata(r, (err, meta) => {
+            r.close();
+            let fp = item.split('/');
+            let m = {
+                artist: meta.artist[0],
+                album: meta.album,
+                name: meta.title,
+                filename: fp[fp.length - 1],
+                disklocation: item,
+                scanroot: scanRoot,
+                playcount: 0,
+                year: meta.year,
+                tracknum: (meta.track || {}).no,
+                dateadded: new Date()
+            };
+            return cb(err, m);
+        });
+    }
 };
 
 const audioFileFilter = x => !x.stats.isDirectory() && audioCodecs.indexOf(x.path.split('.').reverse()[0]) > -1;
@@ -124,7 +127,7 @@ const scanDirectory = function (dir, errCb) {
             }).on('end', () => {
                 console.log('Found ' + files.length + ' files');
                 let start = Date.now();
-                async.mapLimit(files, 500, metadataExtractor, (err, meta) => {
+                async.mapLimit(files, 500, metadataExtractor(dir), (err, meta) => {
                     let dur = (Date.now() - start) / 1000;
                     console.log('Found metadata for ' + meta.length + ' files');
                     console.log('Took ' + dur + ' seconds (' + dur / meta.length + ' seconds per file)');

@@ -10,6 +10,7 @@ const trackSchema = Schema({
     tracknum: Number,
     filename: String,
     disklocation: String,
+    scanroot: String,
     year: String,
     dateadded: Date,
     lastplayed: Date,
