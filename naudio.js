@@ -23,6 +23,8 @@ const Playlist = require('./models/playlist');
 
 const app = express();
 
+const dbOpts = { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } };
+
 const audioCodecs = ['mp3', 'aac', 'wma', 'wav', 'alac', 'flac', 'ogg'];
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -41,10 +43,7 @@ try {
 }
 
 mongoose.Promise = global.Promise;
-mongoose.connect(config.dbUrl, { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } });
-
-// TODO: for testing only
-Track.remove({});
+const db = mongoose.connect(config.dbUrl, dbOpts);
 
 // globals
 const nowplaying = {
@@ -71,7 +70,7 @@ wsServer.broadcast = function (data) {
 
 const updatePlaystate = function (state) {
     nowplaying.playstate = state;
-    wsServer.broadcast(nowplaying);
+    wsServer.broadcast({nowplaying: nowplaying});
 };
 
 player.on('status', status => {
@@ -88,7 +87,7 @@ player.on('time', time => nowplaying.time.current = time);
 const scanDirectory = function (dir, errCb) {
     fs.access(dir, fs.constants.R_OK, (err) => {
         if (err) {
-            console.error('Could not scan directory. Does it exist?', dir);
+            console.error('Could not scan directory. Does it exist?', err);
             errCb(err);
         } else {
             let count = 0;
@@ -105,9 +104,10 @@ const scanDirectory = function (dir, errCb) {
                                     album: metadata.album,
                                     name: metadata.title,
                                     filename: fnameParts[fnameParts.length - 1],
-                                    diskLocation: item.path,
+                                    disklocation: item.path,
+                                    scanroot: dir,
                                     playcount: 0,
-                                    trackNum: (metadata.track || '').split('/')[0]
+                                    tracknum: (metadata.track || '').split('/')[0]
                                 });
                                 console.log('saving: ' + newTrack.filename);
 
@@ -127,11 +127,17 @@ const scanDirectory = function (dir, errCb) {
     });
 };
 
-scanDirectory('/home/tsned/Music/Saosin', () => {});
+db.then(() => scanDirectory('/home/tsned/Music', () => {}));
 
 wsServer.on('connection', function (websocket) {
 
-    wsServer.broadcast(nowplaying);
+    websocket.broadcast({nowplaying: nowplaying});
+
+    db.then(() => {
+        Track.distinct('artist', function (err, result) {
+            if (!err) websocket.send(result);
+        });
+    });
 
     websocket.on('message', function (msg) {
         let message = {};
@@ -176,7 +182,7 @@ wsServer.on('connection', function (websocket) {
 
 setInterval(() => {
     if (nowplaying.playstate === PlayStateEnum.PLAYING) {
-        wsServer.broadcast(nowplaying);
+        wsServer.broadcast({nowplaying: nowplaying});
     }
 }, 1000);
 

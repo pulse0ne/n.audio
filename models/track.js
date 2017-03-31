@@ -7,19 +7,20 @@ const trackSchema = Schema({
     name: String,
     artist: String,
     album: String,
-    trackNum: Number,
+    tracknum: Number,
     filename: String,
-    diskLocation: String,
-    dateAdded: Date,
-    lastPlayed: Date,
+    disklocation: String,
+    scanroot: String,
+    dateadded: Date,
+    lastplayed: Date,
     playcount: Number
 });
 
 trackSchema.pre('save', (next) => {
     let now = new Date();
 
-    if (!this.dateAdded) {
-        this.dateAdded = now;
+    if (!this.dateadded) {
+        this.dateadded = now;
     }
 
     next();
