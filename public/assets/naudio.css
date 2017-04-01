@@ -1,8 +1,22 @@
+@font-face {
+    font-family: 'Josefin Sans';
+    src: url(fonts/JosefinSans-Regular.ttf);
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Raleway';
+    src: url(fonts/Raleway-Regular.ttf);
+    font-weight: normal;
+}
+
 html,
 body {
     background: #272822;
     color: #eeeeee;
     height: 100%;
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
 }
 
 body {
@@ -30,6 +44,7 @@ body {
 .clickable {
     cursor: pointer;
 }
+
 .clickable,
 .clickable:active,
 .clickable:focus {
@@ -40,6 +55,11 @@ body {
     margin: 5px auto;
     display: flex;
     align-items: center;
+}
+
+.time-label {
+    font-family: monospace;
+    font-size: 11px;
 }
 
 .main {
@@ -58,11 +78,11 @@ body {
 }
 
 .view.idle {
-    z-index: 8888;
+    z-index: 7777;
 }
 
 .view.nav {
-    z-index: 7777;
+    z-index: 6666;
 }
 
 .view.idle.ng-enter {
@@ -100,7 +120,7 @@ body {
 .sticky-footer {
     background: #272822;
     border-top: 1px solid #444444;
-    z-index: 9999;
+    z-index: 8888;
 }
 
 md-slider.vol-slider {

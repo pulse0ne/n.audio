@@ -13,11 +13,6 @@
         'n.audio.track.slider'
     ]);
 
-    app.constant('SVGs', {
-        play: 'M 0 0 L 0 32 L 32 16 z',
-        pause: 'M 2 0 L 2 32 L 12 32 L 12 0 L 2 0 M 20 0 L 20 32 L 30 32 L 30 0 L 20 0'
-    });
-
     app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
         $routeProvider.when('/', {
             templateUrl: 'views/nav/nav.html',
@@ -34,14 +29,46 @@
         $locationProvider.html5Mode(true);
     }]);
 
+    app.constant('SVGs', {
+        play: 'M 0 0 L 0 32 L 32 16 z',
+        pause: 'M 2 0 L 2 32 L 12 32 L 12 0 L 2 0 M 20 0 L 20 32 L 30 32 L 30 0 L 20 0'
+    });
+
+    app.constant('$cookies', function ($$document) {
+        return (($$document || {}).cookie || '').split(';').reduce(function (a, c) {
+            let ix = c.indexOf('=');
+            if (ix > -1 && ix < c.length - 1) a[c.substr(0, ix).trim()] = c.substr(ix + 1).trim();
+            return a;
+        }, {});
+    });
+
+    app.constant('$debounce', function (func, wait, immediate) {
+        let timeout;
+        return function () {
+            let context = this;
+            let args = arguments;
+            let later = function () {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            let callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    });
+
     app.service('n.audio.service', [
         '$websocket',
         '$rootScope',
-        function ($websocket, $rootScope) {
+        '$document',
+        '$cookies',
+        function ($websocket, $rootScope, $document, $cookies) {
             const self = this;
+            const wsCookie = $cookies($document[0]);
 
             const ws = $websocket.$new({
-                url: 'ws://' + window.location.hostname + ':1777/ws',
+                url: 'ws://' + window.location.hostname + ':' + wsCookie.wsPort + decodeURIComponent(wsCookie.wsPath),
                 reconnect: true,
                 reconnectInterval: 1000,
                 maxReconnectInterval: 10000,
@@ -78,10 +105,11 @@
         '$scope',
         '$timeout',
         '$location',
+        '$debounce',
         'ngIdle',
         'n.audio.service',
         'SVGs',
-        function ($scope, $timeout, $location, ngIdle, naudio, svg) {
+        function ($scope, $timeout, $location, $debounce, ngIdle, naudio, svg) {
             $scope.CommandEnum = (window.enums || {}).CommandEnum || {};
             $scope.PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
             $scope.wsConnected = false;
@@ -95,29 +123,13 @@
             $scope.volumeSlider = 100;
             $scope.svgPath = svg.play;
 
-            // TODO
+            // TODO: test code
             $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
             ngIdle.setIdle(5);
             // TODO
 
 
-            const debounce = function (func, wait, immediate) {
-                let timeout;
-                return function () {
-                    let context = this;
-                    let args = arguments;
-                    let later = function () {
-                        timeout = null;
-                        if (!immediate) func.apply(context, args);
-                    };
-                    let callNow = immediate && !timeout;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                    if (callNow) func.apply(context, args);
-                };
-            };
-
-            $scope.$watch('volumeSlider', debounce(function (newVal, oldVal) {
+            $scope.$watch('volumeSlider', $debounce(function (newVal, oldVal) {
                 if (newVal !== oldVal) {
                     naudio.cmd({command: $scope.CommandEnum.SET_VOLUME, data: Math.floor(newVal)});
                 }
@@ -134,7 +146,7 @@
             });
 
             $scope.$on('ngIdle', function () {
-                if ($location.path() !== '/idle') {
+                if ($location.path() !== '/idle' && $scope.nowplaying.playstate === $scope.PlayStateEnum.PLAYING) {
                     console.log('ngIdle fired');
                     $location.path('/idle');
                 }

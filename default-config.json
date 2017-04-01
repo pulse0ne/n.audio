@@ -1,3 +1,7 @@
 {
-    "dbUrl": "mongodb://localhost:27017/naudio"
+    "dbUrl": "mongodb://localhost:27017/naudio",
+    "httpPort": 8080,
+    "wsPort": 1777,
+    "wsPath": "/ws",
+    "rootDir": "/"
 }

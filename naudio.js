@@ -4,6 +4,7 @@
 'use strict';
 
 const async = require('async');
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const fs = require('fs-extra');
 const klaw = require('klaw');
@@ -19,6 +20,7 @@ const enums = require('./common/enums.js');
 
 const PlayStateEnum = enums.PlayStateEnum;
 const CommandEnum = enums.CommandEnum;
+const ViewTypeEnum = enums.ViewTypeEnum;
 
 // db models
 const Track = require('./models/track');
@@ -27,10 +29,7 @@ const Playlist = require('./models/playlist');
 const app = express();
 
 const dbOpts = { server: { socketTimeoutMS: 0, connectionTimeoutMS: 0 } };
-const audioCodecs = ['mp3', 'm4a', 'flac', 'ogg'];
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/common', express.static(path.join(__dirname, 'common')));
+const supportedExts = ['.mp3', '.m4a', '.flac', '.ogg'];
 
 let config = {};
 try {
@@ -44,12 +43,22 @@ try {
     process.exit(1);
 }
 
+app.use(cookieParser());
+app.use((req, res, next) => {
+    res.cookie('wsPort', config.wsPort);
+    res.cookie('wsPath', config.wsPath);
+    next();
+});
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/common', express.static(path.join(__dirname, 'common')));
+
 mongoose.Promise = global.Promise;
 const db = mongoose.connect(config.dbUrl, dbOpts);
 /*TODO:remove*/db.then(() => Track.remove({}));
 
 class NAudioEmitter extends EventEmitter {}
 
+const rootDir = config.rootDir;
 const emitter = new NAudioEmitter();
 const nowplaying = {
     time: {
@@ -64,7 +73,7 @@ const nowplaying = {
     filename: null,
     context: null
 };
-const wsServer = new ws.Server({ port: 1777, path: '/ws' });
+const wsServer = new ws.Server({ port: config.wsPort, path: config.wsPath });
 const player = new mplayer();
 
 wsServer.broadcast = function (data) {
@@ -91,15 +100,14 @@ player.on('time', time => nowplaying.time.current = time);
 
 const metadataExtractor = function (scanRoot) {
     return function (item, cb) {
-        let r = fs.createReadStream(item);
-        metadata(r, (err, meta) => {
-            r.close();
-            let fp = item.split('/');
+        let readStream = fs.createReadStream(item);
+        metadata(readStream, (err, meta) => {
+            readStream.close();
             let m = {
                 artist: meta.artist[0],
                 album: meta.album,
                 name: meta.title,
-                filename: fp[fp.length - 1],
+                filename: path.basename(item),
                 disklocation: item,
                 scanroot: scanRoot,
                 playcount: 0,
@@ -112,7 +120,19 @@ const metadataExtractor = function (scanRoot) {
     }
 };
 
-const audioFileFilter = x => !x.stats.isDirectory() && audioCodecs.indexOf(x.path.split('.').reverse()[0]) > -1;
+const audioFileFilter = x => !x.stats.isDirectory() && supportedExts.indexOf(path.extname(x.path)) > -1;
+
+const doBulkTrackSave = function (err, meta) {
+    console.log('Found metadata for ' + meta.length + ' files');
+    db.then(() => {
+        let bulk = Track.collection.initializeUnorderedBulkOp();
+        meta.forEach(r => bulk.find({match: 'disklocation'}).upsert().updateOne(r));
+        bulk.execute((err, res) => {
+            console.log('Bulk insert complete. isOk=' + res.isOk() + ' | nUpserted=' + res.nUpserted);
+            emitter.emit('db.scan.complete');
+        });
+    });
+};
 
 const scanDirectory = function (dir, errCb) {
     fs.access(dir, fs.constants.R_OK, (err) => {
@@ -126,26 +146,13 @@ const scanDirectory = function (dir, errCb) {
                 }
             }).on('end', () => {
                 console.log('Found ' + files.length + ' files');
-                let start = Date.now();
-                async.mapLimit(files, 500, metadataExtractor(dir), (err, meta) => {
-                    let dur = (Date.now() - start) / 1000;
-                    console.log('Found metadata for ' + meta.length + ' files');
-                    console.log('Took ' + dur + ' seconds (' + dur / meta.length + ' seconds per file)');
-                    db.then(() => {
-                        let bulk = Track.collection.initializeUnorderedBulkOp();
-                        meta.forEach(r => bulk.find({match: 'disklocation'}).upsert().updateOne(r));
-                        bulk.execute((err, res) => {
-                            console.log('Bulk insert complete. isOk:', res.isOk());
-                            emitter.emit('db.scan.complete');
-                        });
-                    });
-                });
+                async.mapLimit(files, 500, metadataExtractor(dir), doBulkTrackSave);
             });
         }
     });
 };
 
-/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Music/Perturbator', () => {}));
+/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Music', () => {}));
 
 wsServer.on('connection', function (websocket) {
 
@@ -153,7 +160,7 @@ wsServer.on('connection', function (websocket) {
 
     db.then(() => {
         Track.distinct('artist', function (err, result) {
-            if (!err) websocket.send(JSON.stringify({ artists: result }));
+            if (!err) websocket.send(JSON.stringify({ view: ViewTypeEnum.ARTIST_VIEW, artists: result }));
         });
     });
 
@@ -170,8 +177,8 @@ wsServer.on('connection', function (websocket) {
             case CommandEnum.SET_PLAYSTATE:
                 if (nowplaying.playstate === PlayStateEnum.STOPPED) {
                     console.log('opening file');
-                       // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                    player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                        player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
+                    //player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
                 } else if (nowplaying.playstate === PlayStateEnum.PAUSED) {
                     console.log('resuming');
                     player.play();
@@ -208,4 +215,4 @@ app.all('*', function (req, res) {
     res.redirect('/');
 });
 
-app.listen(8080, () => console.log('server started'));
+app.listen(config.httpPort, () => console.log('server started'));
