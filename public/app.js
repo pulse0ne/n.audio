@@ -58,6 +58,11 @@
         };
     });
 
+    app.constant('$viewSort', {
+        artist: function (a, b) { return a.localeCompare(b, 'en', { sensitivity: 'base' }) },
+        track: function (a, b) { return a.tracknum - b.tracknum }
+    });
+
     app.service('n.audio.service', [
         '$websocket',
         '$rootScope',
@@ -106,32 +111,39 @@
         '$timeout',
         '$location',
         '$debounce',
+        '$viewSort',
         'ngIdle',
         'n.audio.service',
         'SVGs',
-        function ($scope, $timeout, $location, $debounce, ngIdle, naudio, svg) {
-            $scope.CommandEnum = (window.enums || {}).CommandEnum || {};
-            $scope.PlayStateEnum = (window.enums || {}).PlayStateEnum || {};
+        function ($scope, $timeout, $location, $debounce, $viewSort, ngIdle, naudio, svg) {
+            const enums = window.enums || {};
+            const Command = enums.Command || {};
+            const PlayState = enums.PlayState || {};
+            const ViewType = enums.ViewType || {};
+            const MessageType = enums.MessageType || {};
             $scope.wsConnected = false;
             $scope.nowplaying = {
-                playstate: $scope.PlayStateEnum.PAUSED,
+                playstate: PlayState.PAUSED,
                 time: {
                     current: 0,
                     total: 0
                 }
+            };
+            $scope.view = {
+                artists: [],
+                albums: []
             };
             $scope.volumeSlider = 100;
             $scope.svgPath = svg.play;
 
             // TODO: test code
             $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
-            ngIdle.setIdle(5);
             // TODO
 
 
             $scope.$watch('volumeSlider', $debounce(function (newVal, oldVal) {
                 if (newVal !== oldVal) {
-                    naudio.cmd({command: $scope.CommandEnum.SET_VOLUME, data: Math.floor(newVal)});
+                    naudio.cmd({type: MessageType.COMMAND, command: Command.SET_VOLUME, data: Math.floor(newVal)});
                 }
             }, 250));
 
@@ -142,11 +154,11 @@
             });
 
             $scope.$watch('nowplaying.playstate', function (newVal) {
-                $scope.svgPath = newVal !== $scope.PlayStateEnum.PLAYING ? svg.play : svg.pause;
+                $scope.svgPath = newVal !== PlayState.PLAYING ? svg.play : svg.pause;
             });
 
             $scope.$on('ngIdle', function () {
-                if ($location.path() !== '/idle' && $scope.nowplaying.playstate === $scope.PlayStateEnum.PLAYING) {
+                if ($location.path() !== '/idle' && $scope.nowplaying.playstate === PlayState.PLAYING) {
                     console.log('ngIdle fired');
                     $location.path('/idle');
                 }
@@ -155,17 +167,22 @@
             // TODO: handle multiple message types
             $scope.$on('ws.message', function (evt, msg) {
                 console.log(JSON.stringify(msg, null, 2));
-                angular.merge($scope.nowplaying, msg.nowplaying);
+                if (msg.view) {
+                    $scope.view.artists = msg.artists;
+                    $scope.view.artists.sort($viewSort.artist);
+                } else if (msg.nowplaying) {
+                    angular.merge($scope.nowplaying, msg.nowplaying);
+                }
                 $scope.$apply();
             });
 
             $scope.onSeek = function (percent) {
-                naudio.cmd({command: $scope.CommandEnum.SEEK_TO, data: percent});
+                naudio.cmd({type: MessageType.COMMAND, command: Command.SEEK_TO, data: percent});
             };
 
             $scope.togglePlaystate = function () {
-                let newState = ($scope.nowplaying || {}).playstate === $scope.PlayStateEnum.PLAYING ? $scope.PlayStateEnum.PAUSED : $scope.PlayStateEnum.PLAYING;
-                naudio.cmd({command: $scope.CommandEnum.SET_PLAYSTATE, data: newState});
+                let newState = ($scope.nowplaying || {}).playstate === PlayState.PLAYING ? PlayState.PAUSED : PlayState.PLAYING;
+                naudio.cmd({type: MessageType.COMMAND, command: Command.SET_PLAYSTATE, data: newState});
             };
 
             naudio.connect();
