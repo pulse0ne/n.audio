@@ -16,16 +16,18 @@ const ws = require('ws');
 const EventEmitter = require('events');
 
 const mplayer = require('./lib/mplayer');
-const enums = require('./common/enums.js');
+const merge = require('./lib/deep-merge');
+const enums = require('./common/enums');
 
 const PlayState = enums.PlayState;
 const Command = enums.Command;
-const ViewType = enums.ViewType;
+const ContextType = enums.ContextType;
 const MessageType = enums.MessageType;
 
 // db models
 const Track = require('./models/track');
 const Playlist = require('./models/playlist');
+const Source = require('./models/source');
 
 const app = express();
 
@@ -61,6 +63,13 @@ class NAudioEmitter extends EventEmitter {}
 
 const rootDir = config.rootDir;
 const emitter = new NAudioEmitter();
+const context = {
+    track: {
+        total: 0,
+        index: 0
+    },
+    type: null
+};
 const nowplaying = {
     time: {
         total: 0,
@@ -72,7 +81,7 @@ const nowplaying = {
     artist: null,
     album: null,
     filename: null,
-    context: null
+    context: context
 };
 const wsServer = new ws.Server({ port: config.wsPort, path: config.wsPath });
 const player = new mplayer();
@@ -91,6 +100,14 @@ const updatePlaystate = function (state) {
     });
 };
 
+const updateNowplayingMetadata = function (metadata) {
+    merge.merge(nowplaying, metadata);
+    wsServer.broadcast({
+        type: MessageType.NOW_PLAYING,
+        nowplaying: nowplaying
+    });
+};
+
 player.on('status', status => {
     nowplaying.volume = status.volume;
     nowplaying.time.total = status.duration;
@@ -102,6 +119,8 @@ player.on('pause', () => updatePlaystate(PlayState.PAUSED));
 player.on('stop', () => updatePlaystate(PlayState.STOPPED));
 player.on('time', time => nowplaying.time.current = time);
 
+
+//--------------------------------------------------------------------------
 const metadataExtractor = function (scanRoot) {
     return function (item, cb) {
         let readStream = fs.createReadStream(item);
@@ -146,10 +165,7 @@ const doBulkTrackSave = function (scanroot) {
     }
 };
 
-const scanDirectory = function (dir, errCb) {
-    // TODO: need to add scan root to database
-    // TODO: need to also check that root doesn't exist already
-    // TODO: if root does exist, probably be easiest to delete root from db then scan
+const walkAndScan = function (dir, errCb) {
     fs.access(dir, fs.constants.R_OK, (err) => {
         if (err) {
             return errCb(err);
@@ -161,13 +177,36 @@ const scanDirectory = function (dir, errCb) {
                 }
             }).on('end', () => {
                 console.log('Found ' + files.length + ' files');
-                async.mapLimit(files, 500, metadataExtractor(dir), doBulkTrackSave(dir));
+                if (files.length > 0) {
+                    async.mapLimit(files, 500, metadataExtractor(dir), doBulkTrackSave(dir));
+                } else {
+                    console.error('No tracks found for scan root!');
+                }
             });
         }
     });
 };
 
-/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Music', () => {}));
+const scanDirectory = function (dir, errCb) {
+    Source.findOne({root: dir}, function (err, root) {
+        if (!err) {
+            Source.remove({ root: dir }, function (err) {
+                if (err) throw err;
+                let src = Source({ root: dir, enabled: true });
+                src.save(function (err) {
+                    if (err) throw err;
+                    walkAndScan(dir, errCb);
+                });
+            });
+        } else {
+            throw err;
+        }
+    });
+};
+
+/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Documents/Perturbator', (e) => { console.error(e) }));
+
+//---------------------------------------------------------------------------
 
 wsServer.on('connection', function (websocket) {
 
@@ -181,7 +220,7 @@ wsServer.on('connection', function (websocket) {
             if (!err) {
                 websocket.send(JSON.stringify({
                     type: MessageType.VIEW_UPDATE,
-                    view: ViewType.ARTIST_VIEW,
+                    view: ContextType.ARTIST,
                     artists: result
                 }));
             }
@@ -202,8 +241,16 @@ wsServer.on('connection', function (websocket) {
                 case Command.SET_PLAYSTATE:
                     if (nowplaying.playstate === PlayState.STOPPED) {
                         console.log('opening file');
-                        player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.mp3');
-                        // player.openFile('/home/tsned/Documents/Perturbator/disco_inferno.flac');
+                        // TODO: play next from context
+                        Track.findOne({disklocation: '/home/tsned/Documents/Perturbator/disco_inferno.mp3'}, function (err, track) {
+                            player.openFile(track.disklocation);
+                            updateNowplayingMetadata({
+                                title: track.name,
+                                artist: track.artist,
+                                album: track.album,
+                                filename: track.disklocation
+                            });
+                        });
                     } else if (nowplaying.playstate === PlayState.PAUSED) {
                         console.log('resuming');
                         player.play();
@@ -216,13 +263,8 @@ wsServer.on('connection', function (websocket) {
                     player.seekPercent(message.data);
                     break;
                 case Command.SET_VOLUME:
-                    let currentPlaystate = nowplaying.playstate;
                     player.volume(message.data);
                     nowplaying.volume = message.data;
-                    // TODO: this is ugly...need to have a smart queue or something
-                    if (currentPlaystate !== PlayState.PLAYING) {
-                        setTimeout(() => player.pause(), 100);
-                    }
                     break;
                 default:
                     break;
@@ -231,6 +273,7 @@ wsServer.on('connection', function (websocket) {
     });
 });
 
+// when something is playing, send an update every second
 setInterval(() => {
     if (nowplaying.playstate === PlayState.PLAYING) {
         wsServer.broadcast({
@@ -240,6 +283,7 @@ setInterval(() => {
     }
 }, 1000);
 
+// rerouting for angular routes
 app.all('*', function (req, res) {
     res.redirect('/');
 });

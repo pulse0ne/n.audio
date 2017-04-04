@@ -10,6 +10,7 @@
         'ngWebsocket',
         'ngPopover',
         'ngIdle',
+        'ngFitText',
         'n.audio.track.slider'
     ]);
 
@@ -119,7 +120,7 @@
             const enums = window.enums || {};
             const Command = enums.Command || {};
             const PlayState = enums.PlayState || {};
-            const ViewType = enums.ViewType || {};
+            const ContextType = enums.ContextType || {};
             const MessageType = enums.MessageType || {};
             $scope.wsConnected = false;
             $scope.nowplaying = {
@@ -130,14 +131,16 @@
                 }
             };
             $scope.view = {
-                artists: [],
-                albums: []
+                type: null,
+                parent: null,
+                data: []
             };
             $scope.volumeSlider = 100;
             $scope.svgPath = svg.play;
 
             // TODO: test code
             $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
+            ngIdle.setIdle(5);
             // TODO
 
 
@@ -164,14 +167,18 @@
                 }
             });
 
-            // TODO: handle multiple message types
             $scope.$on('ws.message', function (evt, msg) {
                 console.log(JSON.stringify(msg, null, 2));
-                if (msg.view) {
-                    $scope.view.artists = msg.artists;
-                    $scope.view.artists.sort($viewSort.artist);
-                } else if (msg.nowplaying) {
-                    angular.merge($scope.nowplaying, msg.nowplaying);
+                switch(msg.type) {
+                    case MessageType.VIEW_UPDATE:
+                        $scope.view.data = msg.data;
+                        $scope.view.data.sort($viewSort.artist); // TODO
+                        break;
+                    case MessageType.NOW_PLAYING:
+                        angular.merge($scope.nowplaying, msg.nowplaying);
+                        break;
+                    default:
+                        break;
                 }
                 $scope.$apply();
             });

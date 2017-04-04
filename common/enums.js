@@ -24,11 +24,12 @@
         DISABLE_SCAN_DIRECTORY: 0x9
     };
 
-    exports.ViewType = {
-        ARTIST_VIEW: 0x1,
-        ALBUM_VIEW: 0x2,
-        ALL_TRACKS_VIEW: 0x3,
-        PLAYLIST_VIEW: 0x4
+    exports.ContextType = {
+        ARTIST: 0x1,
+        ALBUM: 0x2,
+        ALL_TRACKS: 0x3,
+        PLAYLIST: 0x4,
+        PLAYLIST_DETAIL: 0x5
     };
 
     Object.freeze(exports.PlayStatEnum);
