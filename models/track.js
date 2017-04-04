@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const trackSchema = Schema({
-    name: String,
+    title: String,
     artist: String,
     album: String,
     tracknum: Number,

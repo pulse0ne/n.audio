@@ -83,7 +83,7 @@ body {
 .view.ng-enter,
 .view.ng-leave {
     position: absolute;
-    transition: 1.5s all ease-in-out;
+    transition: 1.25s all ease-in-out;
 }
 
 .view.idle {
@@ -130,6 +130,15 @@ body {
     background: #272822;
     border-top: 1px solid #444444;
     z-index: 8888;
+}
+
+#song-artist {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+#song-title {
+    
 }
 
 md-slider.vol-slider {

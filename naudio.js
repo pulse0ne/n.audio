@@ -130,7 +130,7 @@ const metadataExtractor = function (scanRoot) {
             let m = {
                 artist: meta.artist[0],
                 album: meta.album,
-                name: meta.title,
+                title: meta.title,
                 filename: path.basename(item),
                 disklocation: item,
                 scanroot: scanRoot,
@@ -221,7 +221,7 @@ wsServer.on('connection', function (websocket) {
                 websocket.send(JSON.stringify({
                     type: MessageType.VIEW_UPDATE,
                     view: ContextType.ARTIST,
-                    artists: result
+                    data: result
                 }));
             }
         });
@@ -243,13 +243,15 @@ wsServer.on('connection', function (websocket) {
                         console.log('opening file');
                         // TODO: play next from context
                         Track.findOne({disklocation: '/home/tsned/Documents/Perturbator/disco_inferno.mp3'}, function (err, track) {
-                            player.openFile(track.disklocation);
-                            updateNowplayingMetadata({
-                                title: track.name,
-                                artist: track.artist,
-                                album: track.album,
-                                filename: track.disklocation
-                            });
+                            if (track) {
+                                player.openFile(track.disklocation);
+                                updateNowplayingMetadata({
+                                    title: track.title,
+                                    artist: track.artist,
+                                    album: track.album,
+                                    filename: track.disklocation
+                                });
+                            }
                         });
                     } else if (nowplaying.playstate === PlayState.PAUSED) {
                         console.log('resuming');
