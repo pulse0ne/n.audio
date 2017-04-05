@@ -133,12 +133,20 @@ body {
 }
 
 #song-artist {
+    width: 90%;
+}
+
+#song-artist * {
     font-weight: 700;
     text-transform: uppercase;
 }
 
 #song-title {
-    
+    width: 75%;
+}
+
+#song-title * {
+    font-weight: 400;
 }
 
 md-slider.vol-slider {

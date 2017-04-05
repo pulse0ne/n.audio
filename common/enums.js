@@ -32,8 +32,15 @@
         PLAYLIST_DETAIL: 0x5
     };
 
+    exports.RepeatMode = {
+        OFF: 0x1,
+        ONE: 0x2,
+        ALL: 0x3
+    };
+
     Object.freeze(exports.PlayStatEnum);
     Object.freeze(exports.MessageType);
     Object.freeze(exports.Command);
     Object.freeze(exports.ViewType);
+    Object.freeze(exports.RepeatMode);
 })(typeof exports === 'undefined' ? window.enums = {} : exports);

@@ -19,10 +19,13 @@ const mplayer = require('./lib/mplayer');
 const merge = require('./lib/deep-merge');
 const enums = require('./common/enums');
 
+const Tracklist = require('./lib/tracklist');
+
 const PlayState = enums.PlayState;
 const Command = enums.Command;
 const ContextType = enums.ContextType;
 const MessageType = enums.MessageType;
+const RepeatMode = enums.RepeatMode;
 
 // db models
 const Track = require('./models/track');
@@ -57,39 +60,29 @@ app.use('/common', express.static(path.join(__dirname, 'common')));
 
 mongoose.Promise = global.Promise;
 const db = mongoose.connect(config.dbUrl, dbOpts);
-/*TODO:remove*/db.then(() => Track.remove({}));
+/*TODO:remove*/
+db.then(() => Track.remove({}));
 
-class NAudioEmitter extends EventEmitter {}
+class NAudioEmitter extends EventEmitter {
+}
 
 const rootDir = config.rootDir;
 const emitter = new NAudioEmitter();
-const context = {
-    track: {
-        total: 0,
-        index: 0
-    },
-    type: null
-};
 const nowplaying = {
-    time: {
-        total: 0,
-        current: 0
-    },
+    time: { total: 0, current: 0 },
     playstate: PlayState.STOPPED,
     volume: 50,
-    title: null,
-    artist: null,
-    album: null,
-    filename: null,
-    context: context
+    track: {},
+    repeat: RepeatMode.OFF,
+    context: null
 };
+let tracklist = null;
 const wsServer = new ws.Server({ port: config.wsPort, path: config.wsPath });
 const player = new mplayer();
 
 wsServer.broadcast = function (data) {
     data = typeof data === 'string' ? data : JSON.stringify(data);
-    [...wsServer.clients].filter(client => client && client.readyState === 1)
-        .forEach(client => client.send(data));
+    [...wsServer.clients].filter(client => client.readyState === 1).forEach(client => client.send(data));
 };
 
 const updatePlaystate = function (state) {
@@ -100,8 +93,8 @@ const updatePlaystate = function (state) {
     });
 };
 
-const updateNowplayingMetadata = function (metadata) {
-    merge.merge(nowplaying, metadata);
+const updateNowplayingTrackInfo = function (track) {
+    nowplaying.track = track;
     wsServer.broadcast({
         type: MessageType.NOW_PLAYING,
         nowplaying: nowplaying
@@ -149,11 +142,11 @@ const audioFileFilter = x => !x.stats.isDirectory() && supportedExts.indexOf(pat
 const doBulkTrackSave = function (scanroot) {
     return function (err, meta) {
         if (err) console.error(err);
-        console.log('Found metadata for ' + meta.length + ' files');
+        console.log('Found metadata for ' + Tracklist.length + ' files');
         db.then(() => {
             console.log('Starting bulk insert');
             let bulk = Track.collection.initializeUnorderedBulkOp();
-            meta.forEach(r => bulk.find({match: 'disklocation'}).upsert().updateOne(r));
+            meta.forEach(r => bulk.find({ match: 'disklocation' }).upsert().updateOne(r));
             bulk.execute((err) => {
                 if (err) console.log(err);
                 Track.count({ scanroot: scanroot }, function (err, c) {
@@ -188,7 +181,7 @@ const walkAndScan = function (dir, errCb) {
 };
 
 const scanDirectory = function (dir, errCb) {
-    Source.findOne({root: dir}, function (err, root) {
+    Source.findOne({ root: dir }, function (err) {
         if (!err) {
             Source.remove({ root: dir }, function (err) {
                 if (err) throw err;
@@ -204,7 +197,36 @@ const scanDirectory = function (dir, errCb) {
     });
 };
 
-/*TODO:remove*/db.then(() => scanDirectory('/home/tsned/Documents/Perturbator', (e) => { console.error(e) }));
+/*TODO:remove*/
+db.then(() => scanDirectory('/home/tsned/Documents/Perturbator', (e) => {
+    console.error(e)
+}));
+
+const playNextFromContext = function () {
+    if (!nowplaying.context) {
+        nowplaying.context = ContextType.ALL_TRACKS;
+    }
+
+    switch (nowplaying.context) {
+        case ContextType.ALL_TRACKS:
+            if (!tracklist || tracklist.length == 0) {
+                Track.find({}, function (err, tracks) {
+                    tracklist = new Tracklist(tracks, 0, nowplaying.repeat);
+                    if (nowplaying.shuffle) {
+                        tracklist.shuffle();
+                    }
+                    let track = tracklist.current;
+                    if (track) {
+                        player.openFile(track.disklocation);
+                        updateNowplayingTrackInfo(track);
+                    }
+                });
+            } else {
+
+            }
+            break;
+    }
+};
 
 //---------------------------------------------------------------------------
 
@@ -240,24 +262,22 @@ wsServer.on('connection', function (websocket) {
             switch (message.command) {
                 case Command.SET_PLAYSTATE:
                     if (nowplaying.playstate === PlayState.STOPPED) {
-                        console.log('opening file');
                         // TODO: play next from context
-                        Track.findOne({disklocation: '/home/tsned/Documents/Perturbator/disco_inferno.mp3'}, function (err, track) {
-                            if (track) {
-                                player.openFile(track.disklocation);
-                                updateNowplayingMetadata({
-                                    title: track.title,
-                                    artist: track.artist,
-                                    album: track.album,
-                                    filename: track.disklocation
-                                });
-                            }
-                        });
+                        //Track.findOne({disklocation: '/home/tsned/Documents/Perturbator/disco_inferno.mp3'}, function (err, track) {
+                        //    if (track) {
+                        //        player.openFile(track.disklocation);
+                        //        updateNowplayingMetadata({
+                        //            title: track.title,
+                        //            artist: track.artist,
+                        //            album: track.album,
+                        //            filename: track.disklocation
+                        //        });
+                        //    }
+                        //});
+                        playNextFromContext();
                     } else if (nowplaying.playstate === PlayState.PAUSED) {
-                        console.log('resuming');
                         player.play();
                     } else if (nowplaying.playstate === PlayState.PLAYING) {
-                        console.log('pausing');
                         player.pause();
                     }
                     break;
