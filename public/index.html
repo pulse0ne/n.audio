@@ -21,9 +21,9 @@
     <div class="sticky-footer" layout="column">
         <div class="top-row" layout="row" layout-align="space-around center">
             <div class="control-container">
-                <div id="prev-ctrl" class="clickable" ng-include="'assets/prev.svg'" ng-click=""></div>
+                <div id="prev-ctrl" class="clickable" ng-include="'assets/prev.svg'" ng-click="TODO()"></div>
                 <div id="play-ctrl" class="clickable" ng-include="'assets/play.svg'" ng-click="togglePlaystate()"></div>
-                <div id="next-ctrl" class="clickable" ng-include="'assets/next.svg'" ng-click=""></div>
+                <div id="next-ctrl" class="clickable" ng-include="'assets/next.svg'" ng-click="playNext()"></div>
             </div>
             <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
             <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100" aria-label="volume"></md-slider>

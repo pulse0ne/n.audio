@@ -192,6 +192,10 @@
                 naudio.cmd({type: MessageType.COMMAND, command: Command.SET_PLAYSTATE, data: newState});
             };
 
+            $scope.playNext = function () {
+                naudio.cmd({type: MessageType.COMMAND, command: Command.PLAY_NEXT});
+            };
+
             naudio.connect();
             ngIdle.start();
         }

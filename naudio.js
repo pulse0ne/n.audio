@@ -85,6 +85,22 @@ wsServer.broadcast = function (data) {
     [...wsServer.clients].filter(client => client.readyState === 1).forEach(client => client.send(data));
 };
 
+const debounce = function (func, wait, immediate) {
+    let timeout;
+    return function () {
+        let context = this;
+        let args = arguments;
+        let later = function () {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        let callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
+};
+
 const updatePlaystate = function (state) {
     nowplaying.playstate = state;
     wsServer.broadcast({
@@ -100,18 +116,6 @@ const updateNowplayingTrackInfo = function (track) {
         nowplaying: nowplaying
     });
 };
-
-player.on('status', status => {
-    nowplaying.volume = status.volume;
-    nowplaying.time.total = status.duration;
-});
-
-player.on('start', () => updatePlaystate(PlayState.PLAYING));
-player.on('play', () => updatePlaystate(PlayState.PLAYING));
-player.on('pause', () => updatePlaystate(PlayState.PAUSED));
-player.on('stop', () => updatePlaystate(PlayState.STOPPED));
-player.on('time', time => nowplaying.time.current = time);
-
 
 //--------------------------------------------------------------------------
 const metadataExtractor = function (scanRoot) {
@@ -142,7 +146,7 @@ const audioFileFilter = x => !x.stats.isDirectory() && supportedExts.indexOf(pat
 const doBulkTrackSave = function (scanroot) {
     return function (err, meta) {
         if (err) console.error(err);
-        console.log('Found metadata for ' + Tracklist.length + ' files');
+        console.log('Found metadata for ' + meta.length + ' files');
         db.then(() => {
             console.log('Starting bulk insert');
             let bulk = Track.collection.initializeUnorderedBulkOp();
@@ -202,6 +206,18 @@ db.then(() => scanDirectory('/home/tsned/Documents/Perturbator', (e) => {
     console.error(e)
 }));
 
+const playTrack = function (track) {
+    if (track) {
+        track.updatePlaycount();
+        track.save();
+        player.openFile(track.disklocation);
+        updateNowplayingTrackInfo(track);
+        console.log('Playing ' + track.title + ' by ' + track.artist);
+    } else {
+        console.log('No track to play');
+    }
+};
+
 const playNextFromContext = function () {
     if (!nowplaying.context) {
         nowplaying.context = ContextType.ALL_TRACKS;
@@ -216,14 +232,20 @@ const playNextFromContext = function () {
                         tracklist.shuffle();
                     }
                     let track = tracklist.current;
-                    if (track) {
-                        player.openFile(track.disklocation);
-                        updateNowplayingTrackInfo(track);
-                    }
+                    playTrack(track);
                 });
             } else {
-
+                let track = tracklist.next;
+                playTrack(track);
             }
+            break;
+        case ContextType.ARTIST:
+            break;
+        case ContextType.ALBUM:
+            break;
+        case ContextType.PLAYLIST:
+            break;
+        default:
             break;
     }
 };
@@ -262,18 +284,6 @@ wsServer.on('connection', function (websocket) {
             switch (message.command) {
                 case Command.SET_PLAYSTATE:
                     if (nowplaying.playstate === PlayState.STOPPED) {
-                        // TODO: play next from context
-                        //Track.findOne({disklocation: '/home/tsned/Documents/Perturbator/disco_inferno.mp3'}, function (err, track) {
-                        //    if (track) {
-                        //        player.openFile(track.disklocation);
-                        //        updateNowplayingMetadata({
-                        //            title: track.title,
-                        //            artist: track.artist,
-                        //            album: track.album,
-                        //            filename: track.disklocation
-                        //        });
-                        //    }
-                        //});
                         playNextFromContext();
                     } else if (nowplaying.playstate === PlayState.PAUSED) {
                         player.play();
@@ -288,12 +298,35 @@ wsServer.on('connection', function (websocket) {
                     player.volume(message.data);
                     nowplaying.volume = message.data;
                     break;
+                case Command.PLAY_NEXT:
+                    playNextFromContext();
+                    break;
                 default:
                     break;
             }
         }
     });
 });
+
+player.on('status', status => {
+    nowplaying.volume = status.volume;
+    nowplaying.time.total = status.duration;
+});
+
+player.on('stop', () => {
+    debounce(() => {
+        if (!player.getStatus().playing) {
+            playNextFromContext();
+        } else {
+            updatePlaystate(PlayState.STOPPED);
+        }
+    }, 500);
+});
+
+player.on('start', () => updatePlaystate(PlayState.PLAYING));
+player.on('play', () => updatePlaystate(PlayState.PLAYING));
+player.on('pause', () => updatePlaystate(PlayState.PAUSED));
+player.on('time', time => nowplaying.time.current = time);
 
 // when something is playing, send an update every second
 setInterval(() => {

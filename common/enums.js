@@ -15,13 +15,15 @@
     exports.Command = {
         SET_PLAYSTATE: 0x1,
         SEEK_TO: 0x2,
-        SET_VOLUME: 0x3,
-        REQUEST_VIEW: 0x4,
-        CREATE_NEW_PLAYLIST: 0x5,
-        ADD_TO_PLAYLIST: 0x6,
-        ADD_SCAN_DIRECTORY: 0x7,
-        REMOVE_SCAN_DIRECTORY: 0x8,
-        DISABLE_SCAN_DIRECTORY: 0x9
+        PLAY_NEXT: 0x3,
+        PLAY_PREV: 0x4,
+        SET_VOLUME: 0x5,
+        REQUEST_VIEW: 0x6,
+        CREATE_NEW_PLAYLIST: 0x7,
+        ADD_TO_PLAYLIST: 0x8,
+        ADD_SCAN_DIRECTORY: 0x9,
+        REMOVE_SCAN_DIRECTORY: 0xa,
+        DISABLE_SCAN_DIRECTORY: 0xb
     };
 
     exports.ContextType = {

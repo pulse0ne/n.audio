@@ -151,6 +151,7 @@ body {
 
 md-slider.vol-slider {
     margin: 0 10px;
+    min-width: 64px;
 }
 
 md-slider.vol-slider .md-track.md-track-fill {

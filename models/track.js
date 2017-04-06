@@ -19,6 +19,7 @@ const trackSchema = Schema({
 
 trackSchema.methods.updatePlaycount = function () {
     this.lastplayed = new Date();
+    this.playcount = (this.playcount || 0) + 1;
 };
 
 const Track = mongoose.model('Track', trackSchema);
