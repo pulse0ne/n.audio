@@ -87,10 +87,10 @@ wsServer.broadcast = function (data) {
 
 const debounce = function (func, wait, immediate) {
     let timeout;
-    return function () {
+    return () => {
         let context = this;
         let args = arguments;
-        let later = function () {
+        let later = () => {
             timeout = null;
             if (!immediate) func.apply(context, args);
         };
@@ -202,7 +202,7 @@ const scanDirectory = function (dir, errCb) {
 };
 
 /*TODO:remove*/
-db.then(() => scanDirectory('/home/tsned/Documents/Perturbator', (e) => {
+db.then(() => scanDirectory('/home/tsned/Music', (e) => {
     console.error(e)
 }));
 
@@ -225,9 +225,9 @@ const playNextFromContext = function () {
 
     switch (nowplaying.context) {
         case ContextType.ALL_TRACKS:
-            if (!tracklist || tracklist.length == 0) {
+            if (!tracklist || tracklist.length === 0) {
                 Track.find({}, function (err, tracks) {
-                    tracklist = new Tracklist(tracks, 0, nowplaying.repeat);
+                    tracklist = new Tracklist(tracks, 0, nowplaying.repeat, 'title');
                     if (nowplaying.shuffle) {
                         tracklist.shuffle();
                     }

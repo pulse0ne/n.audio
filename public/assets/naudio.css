@@ -71,7 +71,7 @@ body {
     font-size: 11px;
 }
 
-.main {
+#main {
     flex: 1;
     overflow: auto;
 }
@@ -126,7 +126,7 @@ body {
     top: 100%;
 }
 
-.sticky-footer {
+#sticky-footer {
     background: #272822;
     border-top: 1px solid #444444;
     z-index: 8888;
@@ -139,6 +139,7 @@ body {
 #song-artist * {
     font-weight: 700;
     text-transform: uppercase;
+    margin: 0;
 }
 
 #song-title {
@@ -147,6 +148,7 @@ body {
 
 #song-title * {
     font-weight: 400;
+    margin: 0;
 }
 
 md-slider.vol-slider {

@@ -59,11 +59,6 @@
         };
     });
 
-    app.constant('$viewSort', {
-        artist: function (a, b) { return a.localeCompare(b, 'en', { sensitivity: 'base' }) },
-        track: function (a, b) { return a.tracknum - b.tracknum }
-    });
-
     app.service('n.audio.service', [
         '$websocket',
         '$rootScope',
@@ -112,11 +107,10 @@
         '$timeout',
         '$location',
         '$debounce',
-        '$viewSort',
         'ngIdle',
         'n.audio.service',
         'SVGs',
-        function ($scope, $timeout, $location, $debounce, $viewSort, ngIdle, naudio, svg) {
+        function ($scope, $timeout, $location, $debounce, ngIdle, naudio, svg) {
             const enums = window.enums || {};
             const Command = enums.Command || {};
             const PlayState = enums.PlayState || {};
@@ -172,7 +166,6 @@
                 switch(msg.type) {
                     case MessageType.VIEW_UPDATE:
                         $scope.view.data = msg.data;
-                        $scope.view.data.sort($viewSort.artist); // TODO
                         break;
                     case MessageType.NOW_PLAYING:
                         angular.merge($scope.nowplaying, msg.nowplaying);

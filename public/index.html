@@ -14,11 +14,11 @@
     <base href="/">
 </head>
 <body ng-controller="n.audio.controller.main" ng-cloak>
-    <div class="main">
+    <div id="main">
         <div ng-view class="view {{viewClass}}"></div>
     </div>
 
-    <div class="sticky-footer" layout="column">
+    <div id="sticky-footer" layout="column">
         <div class="top-row" layout="row" layout-align="space-around center">
             <div class="control-container">
                 <div id="prev-ctrl" class="clickable" ng-include="'assets/prev.svg'" ng-click="TODO()"></div>
