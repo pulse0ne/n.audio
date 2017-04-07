@@ -8,6 +8,8 @@
         let count = 0;
         let idled = false;
         let interval = null;
+        let ignored = null;
+        const events = 'keydown keypress mousemove mousedown click wheel select touchstart touchmove';
         const options = {
             checkInterval: 2, // check every 2 seconds
             idle: 30 // 30 seconds until idle
@@ -37,7 +39,7 @@
             }
         };
 
-        $document.on('keydown keypress mousemove mousedown click wheel select touchstart touchmove', function () {
+        $document.on(events, function () {
             count = 0;
             idled = false;
         });

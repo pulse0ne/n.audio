@@ -116,13 +116,16 @@
             const PlayState = enums.PlayState || {};
             const ContextType = enums.ContextType || {};
             const MessageType = enums.MessageType || {};
+            const walls = ['wall1.jpg', 'wall2.jpg', 'wall3.jpg'].map(function (w) { return 'assets/' + w });
+
             $scope.wsConnected = false;
             $scope.nowplaying = {
                 playstate: PlayState.PAUSED,
                 time: {
                     current: 0,
                     total: 0
-                }
+                },
+                track: null
             };
             $scope.view = {
                 type: null,
@@ -154,6 +157,13 @@
                 $scope.svgPath = newVal !== PlayState.PLAYING ? svg.play : svg.pause;
             });
 
+            $scope.$watch('nowplaying.track', function (nv, ov) {
+                if ($location.path() === '/idle' && nv && ov && nv !== ov) {
+                    console.log('track changed in idle');
+                    // TODO: do background image change
+                }
+            }, true);
+
             $scope.$on('ngIdle', function () {
                 if ($location.path() !== '/idle' && $scope.nowplaying.playstate === PlayState.PLAYING) {
                     console.log('ngIdle fired');
@@ -162,7 +172,7 @@
             });
 
             $scope.$on('ws.message', function (evt, msg) {
-                console.log(JSON.stringify(msg, null, 2));
+                //console.log(JSON.stringify(msg, null, 2));
                 switch(msg.type) {
                     case MessageType.VIEW_UPDATE:
                         $scope.view.data = msg.data;
@@ -185,9 +195,8 @@
                 naudio.cmd({type: MessageType.COMMAND, command: Command.SET_PLAYSTATE, data: newState});
             };
 
-            $scope.playNext = function () {
-                naudio.cmd({type: MessageType.COMMAND, command: Command.PLAY_NEXT});
-            };
+            $scope.playNext = angular.bind(this, naudio.cmd, {type: MessageType.COMMAND, command: Command.PLAY_NEXT});
+            $scope.playPrevious = angular.bind(this, naudio.cmd, {type: MessageType.COMMAND, command: Command.PLAY_PREV});
 
             naudio.connect();
             ngIdle.start();
@@ -197,7 +206,8 @@
     app.filter('trackTime', function () {
         return function (val) {
             let dur = moment.duration(val * 1000);
-            return moment(dur.asMilliseconds()).format('mm:ss');
+            let time = moment(dur.asMilliseconds()).format('mm:ss');
+            return time === 'Invalid date' ? '00:00' : time;
         }
     });
 })(window.angular);

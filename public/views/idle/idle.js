@@ -9,6 +9,10 @@
         function ($scope, $document, $location) {
             $scope.viewClass = 'idle';
 
+            angular.element('#sticky-footer').on('mousedown touchstart', function (e) {
+                e.stopPropagation();
+            });
+
             $document.on('mousedown touchstart keydown', function () {
                 $location.path('/');
             });

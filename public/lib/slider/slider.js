@@ -26,7 +26,7 @@ _slider.factory('nSliderFactory', [function () {
         self.barElem = self.elem.find('.track-bar');
 
         self.updateProgress = function (curr, tot) {
-            self.scope.progressStyle.width = ((curr / (tot || 1)) * 100) + '%';
+            self.scope.progressStyle.width = Math.min(((curr / (tot || 1)) * 100), 100) + '%';
         };
 
         self.getEventPosPercent = function (event) {

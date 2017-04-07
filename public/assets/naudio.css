@@ -12,7 +12,6 @@
 
 html,
 body {
-    background: #272822;
     color: #eeeeee;
     height: 100%;
     font-family: 'Raleway', sans-serif;
@@ -20,6 +19,7 @@ body {
 }
 
 body {
+    background: url(wall1.jpg) fixed;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -78,12 +78,7 @@ body {
 
 .view {
     position: relative;
-}
-
-.view.ng-enter,
-.view.ng-leave {
-    position: absolute;
-    transition: 1.25s all ease-in-out;
+    height: 100%;
 }
 
 .view.idle {
@@ -92,39 +87,27 @@ body {
 
 .view.nav {
     z-index: 6666;
+    background: #272822;
+    transition: 1.25s all ease-in-out;
 }
 
-.view.idle.ng-enter {
-    top: -100%;
-}
-
-.view.idle.ng-enter-active {
-    top: 0;
-}
-
-.view.idle.ng-leave {
-    top: 0;
-}
-
-.view.idle.ng-leave-active {
-    top: -100%;
-}
-
+/*** do not combine ***/
 .view.nav.ng-enter {
-    top: 100%;
+    opacity: 0;
 }
 
 .view.nav.ng-enter-active {
-    top: 0;
+    opacity: 1;
 }
 
 .view.nav.ng-leave {
-    top: 0;
+    opacity: 1;
 }
 
 .view.nav.ng-leave-active {
-    top: 100%;
+    opacity: 0;
 }
+/*********************/
 
 #sticky-footer {
     background: #272822;
@@ -134,21 +117,25 @@ body {
 
 #song-artist {
     width: 90%;
+    text-align: center;
 }
 
 #song-artist * {
     font-weight: 700;
     text-transform: uppercase;
     margin: 0;
+    text-align: center;
 }
 
 #song-title {
     width: 75%;
+    text-align: center;
 }
 
 #song-title * {
     font-weight: 400;
     margin: 0;
+    text-align: center;
 }
 
 md-slider.vol-slider {

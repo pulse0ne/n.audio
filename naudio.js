@@ -63,8 +63,7 @@ const db = mongoose.connect(config.dbUrl, dbOpts);
 /*TODO:remove*/
 db.then(() => Track.remove({}));
 
-class NAudioEmitter extends EventEmitter {
-}
+class NAudioEmitter extends EventEmitter {}
 
 const rootDir = config.rootDir;
 const emitter = new NAudioEmitter();
@@ -77,6 +76,8 @@ const nowplaying = {
     context: null
 };
 let tracklist = null;
+let previousTimeout = null;
+
 const wsServer = new ws.Server({ port: config.wsPort, path: config.wsPath });
 const player = new mplayer();
 
@@ -300,6 +301,15 @@ wsServer.on('connection', function (websocket) {
                     break;
                 case Command.PLAY_NEXT:
                     playNextFromContext();
+                    break;
+                case Command.PLAY_PREV:
+                    if (nowplaying.playstate === PlayState.PLAYING && !previousTimeout) {
+                        player.seekPercent(0);
+                        previousTimeout = setTimeout(() => previousTimeout = null, 1500);
+                    } else {
+                        let track = tracklist.prev;
+                        playTrack(track);
+                    }
                     break;
                 default:
                     break;
