@@ -371,4 +371,4 @@ app.all('*', function (req, res) {
     res.redirect('/');
 });
 
-app.listen(config.httpPort, () => console.log('server started'));
+app.listen(config.httpPort, () => console.log('http server started'));

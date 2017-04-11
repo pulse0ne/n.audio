@@ -110,7 +110,7 @@
 
                         if (id) {
                             fitTextService.register(id, this);
-                            scope.$on('$destroy', angular.bind(fitTextService.unregister, id));
+                            scope.$on('$destroy', angular.bind(this, fitTextService.unregister, id));
                         }
                     }
                 }
