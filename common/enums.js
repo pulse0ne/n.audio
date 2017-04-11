@@ -23,7 +23,8 @@
         ADD_TO_PLAYLIST: 0x8,
         ADD_SCAN_DIRECTORY: 0x9,
         REMOVE_SCAN_DIRECTORY: 0xa,
-        DISABLE_SCAN_DIRECTORY: 0xb
+        DISABLE_SCAN_DIRECTORY: 0xb,
+        SET_EQ: 0xc
     };
 
     exports.ContextType = {

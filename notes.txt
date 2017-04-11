@@ -1,2 +1,5 @@
 - investigate locking down mongodb
 - investigate mac filtering
+
+
+<exec> -a <file> -x --audio-format "mp3" --audio-quality 320K --prefer-ffmpeg

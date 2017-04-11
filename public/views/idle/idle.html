@@ -1,8 +1,11 @@
-<div layout="column" layout-align="center center" layout-fill>
-    <div id="song-artist">
-        <h1 fittext>{{nowplaying.track.artist}}</h1>
+<div id="idle-container" layout="column" layout-align="center center" layout-fill>
+    <div id="idle-song-info" layout="column" layout-align="center center" layout-fill>
+        <div id="song-artist" class="song-info">
+            <h1 fittext="artist">{{nowplaying.track.artist}}</h1>
+        </div>
+        <div id="song-title" class="song-info">
+            <h1 fittext="title">{{nowplaying.track.title}}</h1>
+        </div>
     </div>
-    <div id="song-title">
-        <h1 fittext>{{nowplaying.track.title}}</h1>
-    </div>
+    <img id="wall" class="idle-animation" src="assets/img/wall1.jpg">
 </div>

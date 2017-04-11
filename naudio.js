@@ -73,10 +73,12 @@ const nowplaying = {
     volume: 50,
     track: {},
     repeat: RepeatMode.OFF,
-    context: null
+    context: null,
+    eq: [0,0,0,0,0,0,0,0,0,0]
 };
 let tracklist = null;
 let previousTimeout = null;
+let controlTimeout = null;
 
 const wsServer = new ws.Server({ port: config.wsPort, path: config.wsPath });
 const player = new mplayer();
@@ -300,16 +302,21 @@ wsServer.on('connection', function (websocket) {
                     nowplaying.volume = message.data;
                     break;
                 case Command.PLAY_NEXT:
+                    controlTimeout = setTimeout(() => controlTimeout = null, 500);
                     playNextFromContext();
                     break;
                 case Command.PLAY_PREV:
                     if (nowplaying.playstate === PlayState.PLAYING && !previousTimeout) {
                         player.seekPercent(0);
-                        previousTimeout = setTimeout(() => previousTimeout = null, 1500);
+                        previousTimeout = setTimeout(() => previousTimeout = null, 1750);
                     } else {
+                        controlTimeout = setTimeout(() => controlTimeout = null, 500);
                         let track = tracklist.prev;
                         playTrack(track);
                     }
+                    break;
+                case Command.SET_EQ:
+                    player.eq(message.data);
                     break;
                 default:
                     break;
@@ -319,24 +326,35 @@ wsServer.on('connection', function (websocket) {
 });
 
 player.on('status', status => {
-    nowplaying.volume = status.volume;
-    nowplaying.time.total = status.duration;
+    if (typeof status.volume === 'number') {
+        nowplaying.volume = status.volume;
+    }
+    if (typeof status.duration === 'number') {
+        nowplaying.time.total = status.duration;
+    }
+    nowplaying.eq = status.eq;
 });
 
 player.on('stop', () => {
     debounce(() => {
         if (!player.getStatus().playing) {
-            playNextFromContext();
+            if (!controlTimeout) playNextFromContext();
         } else {
             updatePlaystate(PlayState.STOPPED);
         }
-    }, 500);
+    }, 750, true)();
+});
+
+player.on('time', t => {
+    let time = parseInt(t);
+    if (time !== nowplaying.time.current && time !== 'NaN') {
+        nowplaying.time.current = time;
+    }
 });
 
 player.on('start', () => updatePlaystate(PlayState.PLAYING));
 player.on('play', () => updatePlaystate(PlayState.PLAYING));
 player.on('pause', () => updatePlaystate(PlayState.PAUSED));
-player.on('time', time => nowplaying.time.current = time);
 
 // when something is playing, send an update every second
 setInterval(() => {

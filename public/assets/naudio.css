@@ -19,7 +19,7 @@ body {
 }
 
 body {
-    background: url(wall1.jpg) fixed;
+    background: #272822;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -44,10 +44,12 @@ body {
     margin: 5px;
 }
 
-.svg-control:hover #control,
-.svg-control:active #control {
-    /*noinspection CssUnknownTarget*/
-    fill: url(#hover);
+.svg-control #control {
+    fill: #eeeeee;
+}
+
+.svg-control:hover #control {
+    fill: black
 }
 
 .clickable {
@@ -61,7 +63,7 @@ body {
 }
 
 .control-container {
-    margin: 5px auto;
+    margin: 5px 10px;
     display: flex;
     align-items: center;
 }
@@ -76,17 +78,37 @@ body {
     overflow: auto;
 }
 
+#idle-container {
+    overflow: hidden;
+}
+
+#idle-container img {
+    height: 384px;
+    min-height: 100%;
+    min-width: 100%;
+    z-index: 8;
+}
+
+#idle-song-info {
+    position: absolute;
+    z-index: 9;
+}
+
+.idle-animation {
+    animation: kenburns 60s infinite;
+}
+
 .view {
     position: relative;
     height: 100%;
 }
 
 .view.idle {
-    z-index: 7777;
+    z-index: 7;
 }
 
 .view.nav {
-    z-index: 6666;
+    z-index: 6;
     background: #272822;
     transition: 1.25s all ease-in-out;
 }
@@ -112,7 +134,7 @@ body {
 #sticky-footer {
     background: #272822;
     border-top: 1px solid #444444;
-    z-index: 8888;
+    z-index: 8;
 }
 
 #song-artist {
@@ -138,17 +160,141 @@ body {
     text-align: center;
 }
 
-md-slider.vol-slider {
-    margin: 0 10px;
-    min-width: 64px;
+.song-info {
+    text-shadow: 0 0 75px black;
 }
 
-md-slider.vol-slider .md-track.md-track-fill {
-    /*background-color: #ff5573;*/
+#slider {
+    min-width: 92px;
+    height: 5px;
+    border: none;
+    border-radius: 0;
+    background: black;
+    box-shadow: none;
+    margin: 0 12px;
+}
+
+#slider .noUi-base .noUi-connect,
+.eq-slider .noUi-base .noUi-connect {
     background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
 }
 
-md-slider.md-default-theme .md-thumb:after, md-slider .md-thumb:after {
-    background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
-    border-color: #ff5573;
+#slider .noUi-base .noUi-origin .noUi-handle {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    content: none;
+    left: -5px;
+    top: -3px;
+    background: #eeeeee;
+    box-shadow: none;
+}
+
+.eq-slider .noUi-base .noUi-origin .noUi-handle {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    content: none;
+    left: -3px;
+    top: -4px;
+    background: #eeeeee;
+    box-shadow: none;
+}
+
+#slider .noUi-base .noUi-origin .noUi-handle::before,
+#slider .noUi-base .noUi-origin .noUi-handle::after,
+.eq-slider .noUi-base .noUi-origin .noUi-handle::before,
+.eq-slider .noUi-base .noUi-origin .noUi-handle::after {
+    display: none;
+}
+
+#eq-slider-wrapper {
+    height: 224px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#eq-sliders {
+    flex: 1;
+}
+
+#eq-values span {
+    color: #eeeeee;
+    font-size: 10px;
+    font-family: monospace;
+    width: 10%;
+    text-align: center;
+    cursor: pointer;
+}
+
+.eq-slider {
+    height: 95%;
+    margin: 5px 15px;
+    width: 5px;
+    min-width: 5px;
+    border: none;
+    border-radius: 0;
+    background: black;
+    box-shadow: none;
+}
+
+.eq-slider .noUi-base::after {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 1px;
+    background: #eeeeee;
+    content: '';
+    width: 100%;
+    display: block;
+}
+
+md-dialog.eq-dialog {
+    border: 1px solid black;
+}
+
+md-backdrop.md-opaque.md-dialog-backdrop {
+    background-color: black;
+    opacity: 0.60;
+}
+
+md-dialog.eq-dialog,
+.eq-dialog-content,
+.eq-dialog-actions {
+    background: #272822;
+}
+
+.zero {
+    color: #eeeeee;
+}
+
+.success {
+    color: #1ba518;
+}
+
+.warning {
+    color: #c26131;
+}
+
+.error {
+    color: #c20000;
+}
+
+@keyframes kenburns {
+    0% {
+        opacity: 0;
+    }
+    5% {
+        opacity: 1;
+    }
+    95% {
+        transform: scale3d(1.5, 1.5, 1.5) translate3d(-10%, -10%, 0px);
+        animation-timing-function: ease-in-out;
+        opacity: 1;
+    }
+    100% {
+        transform: scale3d(1.5, 1.5, 1.5) translate3d(-10%, -10%, 0px);
+        opacity: 0;
+    }
 }

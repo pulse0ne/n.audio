@@ -26,7 +26,8 @@ _slider.factory('nSliderFactory', [function () {
         self.barElem = self.elem.find('.track-bar');
 
         self.updateProgress = function (curr, tot) {
-            self.scope.progressStyle.width = Math.min(((curr / (tot || 1)) * 100), 100) + '%';
+            let prog = (curr / (tot || 1)) * 100;
+            self.scope.progressStyle.width = (prog > 100 ? 0 : prog) + '%';
         };
 
         self.getEventPosPercent = function (event) {
@@ -55,7 +56,7 @@ _slider.factory('nSliderFactory', [function () {
 
         self.bindEvents = function () {
             self.barElem.on('mousedown', angular.bind(self, self.onSeek));
-            // self.barElem.on('touchstart', angular.bind(self, self.onSeek));
+            self.barElem.on('touchstart', angular.bind(self, self.onSeek));
         };
 
         self.unbindEvents = function () {
@@ -63,7 +64,6 @@ _slider.factory('nSliderFactory', [function () {
         };
 
         self.onSeek = function (event) {
-            console.log('onSeek');
             event.stopPropagation();
             event.preventDefault();
             let newPos = this.getEventPosPercent(event);

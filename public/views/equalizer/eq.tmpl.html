@@ -1,0 +1,54 @@
+<md-dialog aria-label="eq" class="eq-dialog">
+    <md-dialog-content class="eq-dialog-content">
+        <div id="eq-slider-wrapper">
+            <div id="eq-sliders" layout="row">
+                <!-- 31.25 Hz -->
+                <div id="eq-slider-0" class="eq-slider"></div>
+                <!-- 62.50 Hz -->
+                <div id="eq-slider-1" class="eq-slider"></div>
+                <!-- 125.00 Hz -->
+                <div id="eq-slider-2" class="eq-slider"></div>
+                <!-- 250.00 Hz -->
+                <div id="eq-slider-3" class="eq-slider"></div>
+                <!-- 500.00 Hz -->
+                <div id="eq-slider-4" class="eq-slider"></div>
+                <!-- 1.00 kHz -->
+                <div id="eq-slider-5" class="eq-slider"></div>
+                <!-- 2.00 kHz -->
+                <div id="eq-slider-6" class="eq-slider"></div>
+                <!-- 4.00 kHz -->
+                <div id="eq-slider-7" class="eq-slider"></div>
+                <!-- 8.00 kHz -->
+                <div id="eq-slider-8" class="eq-slider"></div>
+                <!-- 16.00 kHz -->
+                <div id="eq-slider-9" class="eq-slider"></div>
+            </div>
+            <div id="eq-values" layout="row" layout-align="center center">
+                <!-- 31.25 Hz -->
+                <span id="eq-value-0">0.0</span>
+                <!-- 62.50 Hz -->
+                <span id="eq-value-1">0.0</span>
+                <!-- 125.00 Hz -->
+                <span id="eq-value-2">0.0</span>
+                <!-- 250.00 Hz -->
+                <span id="eq-value-3">0.0</span>
+                <!-- 500.00 Hz -->
+                <span id="eq-value-4">0.0</span>
+                <!-- 1.00 kHz -->
+                <span id="eq-value-5">0.0</span>
+                <!-- 2.00 kHz -->
+                <span id="eq-value-6">0.0</span>
+                <!-- 4.00 kHz -->
+                <span id="eq-value-7">0.0</span>
+                <!-- 8.00 kHz -->
+                <span id="eq-value-8">0.0</span>
+                <!-- 16.00 kHz -->
+                <span id="eq-value-9">0.0</span>
+            </div>
+        </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row" layout-align="center center" class="eq-dialog-actions">
+        <md-button class="md-icon-button" md-no-ink aria-label="okay" ng-click="okay()"><i class="fa fa-fw fa-check success"></i></md-button>
+        <md-button class="md-icon-button" md-no-ink aria-label="cancel" ng-click="cancel()"><i class="fa fa-fw fa-close error"></i></md-button>
+    </md-dialog-actions>
+</md-dialog>

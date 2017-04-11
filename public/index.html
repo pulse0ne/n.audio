@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="lib/vendor/material/angular-material.min.css">
     <link rel="stylesheet" href="lib/vendor/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="lib/slider/slider.css">
-    <link rel="stylesheet" href="lib/popover/ngPopover.css">
+    <link rel="stylesheet" href="lib/vendor/slider/nouislider.min.css">
     <link rel="stylesheet" href="assets/naudio.css">
 
     <base href="/">
@@ -26,10 +26,11 @@
                 <div id="next-ctrl" class="clickable" ng-include="'assets/next.svg'" ng-click="playNext()"></div>
             </div>
             <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
-            <md-slider class="vol-slider" ng-model="volumeSlider" min="0" max="100" aria-label="volume"></md-slider>
+            <div id="slider"></div>
         </div>
         <div class="bottom-row" layout="row" layout-align="space-around center">
-            More Controls
+            <md-button class="md-icon-button" aria-label="eq" ng-click="openEqualizer()"><i class="fa fa-fw fa-sliders fa-rotate-90"></i></md-button>
+            <div ng-show="nowplaying.track">{{nowplaying.track.artist}} - {{nowplaying.track.title}}</div>
         </div>
     </div>
 
@@ -50,12 +51,15 @@
     <script src="lib/vendor/moment/moment.min.js"></script>
 
     <!-- fit text -->
-    <script src="lib/vendor/ngFitText/ngFitText.min.js"></script>
+    <!--<script src="lib/vendor/ngFitText/ngFitText.min.js"></script>-->
+    <script src="lib/ngFitText.js"></script>
+
+    <!-- noui slider -->
+    <script src="lib/vendor/slider/nouislider.min.js"></script>
 
     <!-- other lib -->
     <script src="lib/websocket.js"></script>
     <script src="lib/slider/slider.js"></script>
-    <script src="lib/popover/ngPopover.js"></script>
     <script src="lib/ngIdle.js"></script>
     <script src="../common/enums.js"></script>
 
