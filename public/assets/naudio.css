@@ -282,6 +282,36 @@ md-dialog.eq-dialog,
     color: #c20000;
 }
 
+
+.list-item {
+    cursor: pointer;
+    transition: 0.15s all ease-in-out;
+    padding: 10px;
+}
+
+.list-item:hover,
+.list-item:active,
+.list-item.long-press-started,
+.list-item.long-press-active {
+    background: rgba(0,0,0,0.75);
+}
+
+.list-item {
+    font-size: 13px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
+
+.list-item .li-artist {
+
+}
+
+.collapsible {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 @keyframes kenburns {
     0% {
         opacity: 0;

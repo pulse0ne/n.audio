@@ -1,3 +1,8 @@
-<div layout-padding>
-    <h1 ng-repeat="a in view.data | orderBy">{{a}}</h1>
+<div>
+    <!-- artist view -->
+    <div ng-if="view.type === context.ARTIST">
+        <div ng-repeat="artist in view.data | orderBy" layout="row" class="list-item" long-press="artistLongPress(artist)">
+            <div flex class="collapsible">{{artist}}</div>
+        </div>
+    </div>
 </div>

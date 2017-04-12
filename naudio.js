@@ -137,7 +137,8 @@ const metadataExtractor = function (scanRoot) {
                 playcount: 0,
                 year: meta.year,
                 tracknum: (meta.track || {}).no,
-                dateadded: new Date()
+                dateadded: new Date(),
+                duration: meta.duration
             };
             return cb(err, m);
         });

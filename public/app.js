@@ -98,7 +98,7 @@
             const enums = window.enums || {};
             const Command = enums.Command || {};
             const PlayState = $scope.ps = enums.PlayState || {};
-            const ContextType = $scope.context= enums.ContextType || {};
+            const ContextType = $scope.context = enums.ContextType || {};
             const MessageType = enums.MessageType || {};
 
             let lastVolume = 50;
@@ -122,9 +122,7 @@
             $scope.svgPath = svg.play;
 
             // TODO: test code
-            $scope.TEST = new Array(50).join().split(',').map(function(i,x){return ++x});
             ngIdle.setIdle(5);
-            //$scope.TEST_EQ = function () {naudio.cmd({type: MessageType.COMMAND, command: Command.SET_EQ})};
             // TODO
 
             $scope.openEqualizer = function () {
@@ -140,7 +138,6 @@
                                 let v = s.noUiSlider.get().replace('+', '');
                                 return parseFloat(v);
                             });
-                            console.log(vals);
                             naudio.cmd({ type: MessageType.COMMAND, command: Command.SET_EQ, data: vals });
                             $mdDialog.hide();
                         };
@@ -192,6 +189,7 @@
             $scope.$on('ws.message', function (evt, msg) {
                 switch(msg.type) {
                     case MessageType.VIEW_UPDATE:
+                        $scope.view.type = msg.view;
                         $scope.view.data = msg.data;
                         break;
                     case MessageType.NOW_PLAYING:
@@ -245,4 +243,37 @@
             return time === 'Invalid date' ? '00:00' : time;
         }
     });
+
+    app.directive('longPress', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, elem, attr) {
+                let pressTimeout;
+
+                elem.on('touchstart', function (event) {
+                    scope.$event = event;
+                    event.stopPropagation();
+                    event.preventDefault();
+                    elem.addClass('long-press-started');
+                    pressTimeout = $timeout(function () {
+                        elem.addClass('long-press-active');
+                        elem.removeClass('long-press-started');
+                        scope.$eval(attr.longPress);
+                    }, 600);
+                });
+
+                elem.on('touchend', function (event) {
+                    scope.$event = event;
+                    elem.removeClass('long-press-active long-press-started');
+                    $timeout.cancel(pressTimeout);
+                    scope.$eval(attr.longPressEnd);
+                });
+
+                scope.$on('$destroy', function () {
+                    elem.removeClass('long-press-active long-press-started');
+                    elem.off('touchstart touchend');
+                });
+            }
+        }
+    }]);
 })(window.angular);

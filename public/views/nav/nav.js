@@ -6,6 +6,10 @@
         '$scope',
         function ($scope) {
             $scope.viewClass = 'nav';
+
+            $scope.artistLongPress = function (artist) {
+                console.log(artist);
+            };
         }
     ]);
 })(window.angular);

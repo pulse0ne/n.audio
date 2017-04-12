@@ -14,7 +14,8 @@ const trackSchema = Schema({
     year: String,
     dateadded: Date,
     lastplayed: Date,
-    playcount: Number
+    playcount: Number,
+    duration: Number
 });
 
 trackSchema.methods.updatePlaycount = function () {
