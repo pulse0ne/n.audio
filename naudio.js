@@ -128,9 +128,9 @@ const metadataExtractor = function (scanRoot) {
             if (err) console.error(item, err);
             readStream.close();
             let m = {
-                artist: meta.artist[0],
-                album: meta.album,
-                title: meta.title,
+                artist: meta.artist[0] || 'Unknown',
+                album: meta.album || 'Unknown',
+                title: meta.title || item,
                 filename: path.basename(item),
                 disklocation: item,
                 scanroot: scanRoot,

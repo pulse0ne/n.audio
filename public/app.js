@@ -243,37 +243,4 @@
             return time === 'Invalid date' ? '00:00' : time;
         }
     });
-
-    app.directive('longPress', ['$timeout', function ($timeout) {
-        return {
-            restrict: 'A',
-            link: function (scope, elem, attr) {
-                let pressTimeout;
-
-                elem.on('touchstart', function (event) {
-                    scope.$event = event;
-                    event.stopPropagation();
-                    event.preventDefault();
-                    elem.addClass('long-press-started');
-                    pressTimeout = $timeout(function () {
-                        elem.addClass('long-press-active');
-                        elem.removeClass('long-press-started');
-                        scope.$eval(attr.longPress);
-                    }, 600);
-                });
-
-                elem.on('touchend', function (event) {
-                    scope.$event = event;
-                    elem.removeClass('long-press-active long-press-started');
-                    $timeout.cancel(pressTimeout);
-                    scope.$eval(attr.longPressEnd);
-                });
-
-                scope.$on('$destroy', function () {
-                    elem.removeClass('long-press-active long-press-started');
-                    elem.off('touchstart touchend');
-                });
-            }
-        }
-    }]);
 })(window.angular);
