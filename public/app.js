@@ -50,6 +50,7 @@
         function ($websocket, $rootScope, $document, $cookies) {
             const self = this;
             const wsCookie = $cookies($document[0]);
+            const MessageType = (window.enums || {}).MessageType || {};
 
             const ws = $websocket.$new({
                 url: 'ws://' + window.location.hostname + ':' + wsCookie.wsPort + decodeURIComponent(wsCookie.wsPath),
@@ -60,8 +61,8 @@
                 immediate: false
             });
 
-            self.cmd = function (cmd) {
-                ws.$send(cmd);
+            self.sendCommand = function (cmdType, data) {
+                ws.$send({type: MessageType.COMMAND, command: cmdType, data: data});
             };
 
             ws.$on('$message', function (message) {
@@ -138,7 +139,7 @@
                                 let v = s.noUiSlider.get().replace('+', '');
                                 return parseFloat(v);
                             });
-                            naudio.cmd({ type: MessageType.COMMAND, command: Command.SET_EQ, data: vals });
+                            naudio.sendCommand(Command.SET_EQ, vals);
                             $mdDialog.hide();
                         };
                     },
@@ -202,16 +203,16 @@
             });
 
             $scope.onSeek = function (percent) {
-                naudio.cmd({type: MessageType.COMMAND, command: Command.SEEK_TO, data: percent});
+                naudio.sendCommand(Command.SEEK_TO, percent);
             };
 
             $scope.togglePlaystate = function () {
                 let newState = ($scope.nowplaying || {}).playstate === PlayState.PLAYING ? PlayState.PAUSED : PlayState.PLAYING;
-                naudio.cmd({type: MessageType.COMMAND, command: Command.SET_PLAYSTATE, data: newState});
+                naudio.sendCommand(Command.SET_PLAYSTATE, newState);
             };
 
-            $scope.playNext = angular.bind(this, naudio.cmd, {type: MessageType.COMMAND, command: Command.PLAY_NEXT});
-            $scope.playPrevious = angular.bind(this, naudio.cmd, {type: MessageType.COMMAND, command: Command.PLAY_PREV});
+            $scope.playNext = angular.bind(this, naudio.sendCommand, Command.PLAY_NEXT);
+            $scope.playPrevious = angular.bind(this, naudio.sendCommand, Command.PLAY_PREV);
 
             domSlider = $document[0].getElementById('slider');
             noUiSlider.create(domSlider, {
@@ -225,7 +226,7 @@
             });
 
             domSlider.noUiSlider.on('end', function (val) {
-                naudio.cmd({type: MessageType.COMMAND, command: Command.SET_VOLUME, data: Math.floor(val)});
+                naudio.sendCommand(Command.SET_VOLUME, Math.floor(val));
             });
 
             // TODO

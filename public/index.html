@@ -7,7 +7,6 @@
 
     <link rel="stylesheet" href="lib/vendor/material/angular-material.min.css">
     <link rel="stylesheet" href="lib/vendor/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="lib/slider/slider.css">
     <link rel="stylesheet" href="lib/vendor/slider/nouislider.min.css">
     <link rel="stylesheet" href="assets/naudio.css">
 
@@ -18,8 +17,8 @@
         <div ng-view class="view {{viewClass}}"></div>
     </div>
 
-    <div id="sticky-footer" layout="column">
-        <div class="top-row" layout="row" layout-align="space-around center">
+    <div id="sticky-footer" class="md-whiteframe-10dp" layout="column">
+        <div layout="row" layout-align="space-around center">
             <div class="control-container">
                 <div id="prev-ctrl" class="clickable" ng-include="'assets/prev.svg'" ng-click="playPrevious()"></div>
                 <div id="play-ctrl" class="clickable" ng-include="'assets/play.svg'" ng-click="togglePlaystate()"></div>
@@ -27,10 +26,6 @@
             </div>
             <n-track-slider total="nowplaying.time.total" current="nowplaying.time.current" on-seek="onSeek"></n-track-slider>
             <div id="slider"></div>
-        </div>
-        <div class="bottom-row" layout="row" layout-align="space-around center">
-            <md-button class="md-icon-button" aria-label="eq" ng-click="openEqualizer()"><i class="fa fa-fw fa-sliders fa-rotate-90"></i></md-button>
-            <div ng-show="nowplaying.track">{{nowplaying.track.artist}} - {{nowplaying.track.title}}</div>
         </div>
     </div>
 
@@ -59,7 +54,7 @@
 
     <!-- other lib -->
     <script src="lib/websocket.js"></script>
-    <script src="lib/slider/slider.js"></script>
+    <script src="lib/slider.js"></script>
     <script src="lib/ngIdle.js"></script>
     <script src="../common/enums.js"></script>
 

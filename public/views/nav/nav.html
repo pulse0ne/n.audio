@@ -1,8 +1,42 @@
-<div>
-    <!-- artist view -->
-    <div ng-if="view.type === context.ARTIST">
-        <div ng-repeat="artist in view.data | orderBy" layout="row" class="list-item">
-            <div flex class="collapsible">{{artist}}</div>
+<div layout="row" layout-fill>
+    <md-sidenav id="left-sidenav" class="md-whiteframe-10dp" md-is-locked-open="true" layout="column">
+        <div class="nav-button" ng-class="{selected: view.type === context.ARTIST}">
+            <i class="fa fa-fw fa-user"></i>
+            <span ng-show="$mdMedia('gt-xs')">Artist</span>
+        </div>
+        <div class="nav-button" ng-class="{selected: view.type === context.ALBUM}">
+            <i class="fa fa-fw fa-th-large"></i>
+            <span ng-show="$mdMedia('gt-xs')">Album</span>
+        </div>
+        <div class="nav-button">
+            <i class="fa fa-fw fa-music"></i>
+            <span ng-show="$mdMedia('gt-xs')">Track</span>
+        </div>
+        <div class="nav-button">
+            <i class="fa fa-fw fa-podcast"></i>
+            <span ng-show="$mdMedia('gt-xs')">Playlist</span>
+        </div>
+        <div class="nav-button" ng-click="openEqualizer()">
+            <i class="fa fa-fw fa-sliders fa-rotate-90"></i>
+            <span ng-show="$mdMedia('gt-xs')">EQ</span>
+        </div>
+        <div class="nav-button">
+            <i class="fa fa-fw fa-database"></i>
+            <span ng-show="$mdMedia('gt-xs')">Sources</span>
+        </div>
+    </md-sidenav>
+    <div id="sidenav-spacer"></div>
+    <div id="content-view" flex>
+        <!-- artist view -->
+        <div ng-if="view.type === context.ARTIST">
+            <div ng-repeat="artist in view.data | orderBy" layout="row" class="list-item">
+                <div flex class="collapsible">{{artist}}</div>
+            </div>
+        </div>
+
+        <!-- album view -->
+        <div ng-if="view.type === context.ALBUM">
+
         </div>
     </div>
 </div>

@@ -12,14 +12,14 @@
 
 html,
 body {
-    color: #eeeeee;
+    color: #272727;
     height: 100%;
     font-family: 'Raleway', sans-serif;
     font-size: 12px;
 }
 
 body {
-    background: #272822;
+    background: #f5f5f5;
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -45,7 +45,7 @@ body {
 }
 
 .svg-control #control {
-    fill: #eeeeee;
+    fill: #272727;
 }
 
 .svg-control:hover #control {
@@ -106,11 +106,12 @@ body {
 
 .view.idle {
     z-index: 7;
+    color: #f5f5f5;
 }
 
 .view.nav {
     z-index: 6;
-    background: #272822;
+    background: #f5f5f5;
     transition: 1.25s all ease-in-out;
 }
 
@@ -133,7 +134,7 @@ body {
 /*********************/
 
 #sticky-footer {
-    background: #272822;
+    background: #f5f5f5;
     border-top: 1px solid #444444;
     z-index: 8;
 }
@@ -165,12 +166,40 @@ body {
     text-shadow: 0 0 75px black;
 }
 
+.track-container {
+    width: 100%;
+}
+
+.track-slider {
+    padding: 2px;
+    width: 100%;
+}
+
+.track-bar {
+    margin: 0 5px;
+    width: 100%;
+    height: 5px;
+    background: rgba(0,0,0,0.38);
+    cursor: pointer;
+}
+
+.track-progress {
+    height: 100%;
+    background: linear-gradient(to top right, #ff843e, #ff5573, #ff62c4);
+    transition: 1000ms linear;
+}
+
+.time-label {
+    font-size: 12px;
+}
+
+
 #slider {
     min-width: 92px;
     height: 5px;
     border: none;
     border-radius: 0;
-    background: black;
+    background: rgba(0,0,0,0.38);
     box-shadow: none;
     margin: 0 12px;
 }
@@ -181,24 +210,26 @@ body {
 }
 
 #slider .noUi-base .noUi-origin .noUi-handle {
+    border: none;
     border-radius: 50%;
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     content: none;
     left: -5px;
     top: -3px;
-    background: #eeeeee;
+    background: #272727;
     box-shadow: none;
 }
 
 .eq-slider .noUi-base .noUi-origin .noUi-handle {
+    border: none;
     border-radius: 50%;
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     content: none;
     left: -3px;
     top: -4px;
-    background: #eeeeee;
+    background: #272727;
     box-shadow: none;
 }
 
@@ -221,7 +252,7 @@ body {
 }
 
 #eq-values span {
-    color: #eeeeee;
+    color: #272727;
     font-size: 10px;
     font-family: monospace;
     width: 10%;
@@ -236,7 +267,7 @@ body {
     min-width: 5px;
     border: none;
     border-radius: 0;
-    background: black;
+    background: rgba(0,0,0,0.38);
     box-shadow: none;
 }
 
@@ -245,7 +276,7 @@ body {
     left: 0;
     top: 50%;
     height: 1px;
-    background: #eeeeee;
+    background: #272727;
     content: '';
     width: 100%;
     display: block;
@@ -263,11 +294,11 @@ md-backdrop.md-opaque.md-dialog-backdrop {
 md-dialog.eq-dialog,
 .eq-dialog-content,
 .eq-dialog-actions {
-    background: #272822;
+    background: #f5f5f5;
 }
 
 .zero {
-    color: #eeeeee;
+    color: #272727;
 }
 
 .success {
@@ -287,29 +318,47 @@ md-dialog.eq-dialog,
     cursor: pointer;
     transition: 0.15s all ease-in-out;
     padding: 10px;
+    font-size: 16px;
 }
 
 .list-item:hover,
 .list-item:active,
 .list-item.long-press-started,
 .list-item.long-press-active {
-    background: rgba(0,0,0,0.75);
-}
-
-.list-item {
-    font-size: 13px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-}
-
-.list-item .li-artist {
-
+    background: rgba(0,0,0,0.25);
 }
 
 .collapsible {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+#left-sidenav {
+    border: 1px solid #444444;
+    height: 100%;
+    background: #272727;
+    color: #f5f5f5;
+    width: auto;
+    min-width: unset;
+    max-width: unset;
+    position: fixed;
+}
+
+.nav-button {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.nav-button:hover,
+.nav-button:active,
+.nav-button.selected {
+    background: #f5f5f5;
+    color: #272727;
+}
+
+#content-view {
+    transition: unset;
 }
 
 @keyframes kenburns {
