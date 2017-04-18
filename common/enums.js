@@ -28,11 +28,13 @@
     };
 
     exports.ContextType = {
-        ARTIST: 0x1,
-        ALBUM: 0x2,
-        ALL_TRACKS: 0x3,
-        PLAYLIST: 0x4,
-        PLAYLIST_DETAIL: 0x5
+        ALL_ARTISTS: 0x1,
+        ARTIST_DETAIL: 0x2,
+        ALL_ALBUMS: 0x3,
+        ALBUM_DETAIL: 0x4,
+        ALL_TRACKS: 0x5,
+        PLAYLIST: 0x6,
+        PLAYLIST_DETAIL: 0x7
     };
 
     exports.RepeatMode = {

@@ -4,14 +4,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const playlistSchema = Schema({
-    title: String,
-    artist: String,
-    album: String,
-    filename: String,
-    diskLocation: String,
-    dateAdded: Date,
-    lastPlayed: Date,
-    playcount: Number
+    name: String,
+    tracks: [{ type: Schema.Types.ObjectId, ref: 'Track' }]
 });
 
 const Playlist = mongoose.model('Playlist', playlistSchema);

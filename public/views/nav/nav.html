@@ -1,18 +1,18 @@
 <div layout="row" layout-fill>
     <md-sidenav id="left-sidenav" class="md-whiteframe-10dp" md-is-locked-open="true" layout="column">
-        <div class="nav-button" ng-class="{selected: view.type === context.ARTIST}">
+        <div class="nav-button" ng-class="{selected: view.type === context.ALL_ARTISTS}" ng-click="changeView(context.ALL_ARTISTS)">
             <i class="fa fa-fw fa-user"></i>
             <span ng-show="$mdMedia('gt-xs')">Artist</span>
         </div>
-        <div class="nav-button" ng-class="{selected: view.type === context.ALBUM}">
+        <div class="nav-button" ng-class="{selected: view.type === context.ALL_ALBUMS}" ng-click="changeView(context.ALL_ALBUMS)">
             <i class="fa fa-fw fa-th-large"></i>
             <span ng-show="$mdMedia('gt-xs')">Album</span>
         </div>
-        <div class="nav-button">
+        <div class="nav-button" ng-class="{selected: view.type === context.ALL_TRACKS}" ng-click="changeView(context.ALL_TRACKS)">
             <i class="fa fa-fw fa-music"></i>
             <span ng-show="$mdMedia('gt-xs')">Track</span>
         </div>
-        <div class="nav-button">
+        <div class="nav-button" ng-class="{selected: view.type === context.PLAYLIST}" ng-click="changeView(context.PLAYLIST)">
             <i class="fa fa-fw fa-podcast"></i>
             <span ng-show="$mdMedia('gt-xs')">Playlist</span>
         </div>
@@ -28,15 +28,30 @@
     <div id="sidenav-spacer"></div>
     <div id="content-view" flex>
         <!-- artist view -->
-        <div ng-if="view.type === context.ARTIST">
+        <div ng-if="view.type === context.ALL_ARTISTS">
             <div ng-repeat="artist in view.data | orderBy" layout="row" class="list-item">
                 <div flex class="collapsible">{{artist}}</div>
             </div>
         </div>
 
         <!-- album view -->
-        <div ng-if="view.type === context.ALBUM">
+        <div ng-if="view.type === context.ALL_ALBUMS">
+            <div ng-repeat="album in view.data | orderBy" layout="row" class="list-item">
+                <div flex class="collapsible">{{album}}</div>
+            </div>
+        </div>
 
+        <!-- track view -->
+        <div ng-if="view.type === context.ALL_TRACKS">
+            <div ng-repeat="track in view.data | orderBy: 'title'" layout="row" class="list-item">
+                <div flex class="collapsible">{{track.title}}</div>
+                <div class="collapsible">{{track.duration | trackTime}}</div>
+            </div>
+        </div>
+
+        <!-- playlist view -->
+        <div ng-if="view.type === context.PLAYLIST">
+            <div class="view-header"></div>
         </div>
     </div>
 </div>

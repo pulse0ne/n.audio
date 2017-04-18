@@ -124,7 +124,7 @@ const updateNowplayingTrackInfo = function (track) {
 const metadataExtractor = function (scanRoot) {
     return function (item, cb) {
         let readStream = fs.createReadStream(item);
-        metadata(readStream, (err, meta) => {
+        metadata(readStream, { duration: true }, (err, meta) => {
             if (err) console.error(item, err);
             readStream.close();
             let m = {
@@ -206,9 +206,7 @@ const scanDirectory = function (dir, errCb) {
 };
 
 /*TODO:remove*/
-db.then(() => scanDirectory('/home/tsned/Music', (e) => {
-    console.error(e)
-}));
+db.then(() => scanDirectory('/home/tsned/Music', e => console.error(e)));
 
 const playTrack = function (track) {
     if (track) {
@@ -243,13 +241,74 @@ const playNextFromContext = function () {
                 playTrack(track);
             }
             break;
-        case ContextType.ARTIST:
+        case ContextType.ALL_ARTISTS:
             break;
-        case ContextType.ALBUM:
+        case ContextType.ALL_ALBUMS:
             break;
         case ContextType.PLAYLIST:
             break;
         default:
+            break;
+    }
+};
+
+const handleViewRequest = function (websocket, viewType, params) {
+    let viewObj = {
+        type: MessageType.VIEW_UPDATE,
+        view: viewType
+    };
+    switch(viewType) {
+        case ContextType.ALL_ARTISTS:
+            Track.distinct('artist', (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj,  { data: result })));
+                }
+            });
+            break;
+        case ContextType.ARTIST_DETAIL:
+            Track.find({artist: params.artist}, (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: { artist: params.artist, data: result }})));
+                }
+            });
+            break;
+        case ContextType.ALL_ALBUMS:
+            Track.distinct('album', (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: result })));
+                }
+            });
+            break;
+        case ContextType.ALBUM_DETAIL:
+            Track.find({album: params.album}, (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: { album: params.album, data: result }})));
+                }
+            });
+            break;
+        case ContextType.ALL_TRACKS:
+            Track.find({}, (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: result })));
+                }
+            });
+            break;
+        case ContextType.PLAYLIST:
+            Playlist.find({}, (err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: result })));
+                }
+            });
+            break;
+        case ContextType.PLAYLIST_DETAIL:
+            Playlist.findOne({_id: params.playlistId}).populate('tracks').exec((err, result) => {
+                if (!err) {
+                    websocket.send(JSON.stringify(Object.assign(viewObj, { data: { playlist: params.playlist, data: result }})))
+                }
+            });
+            break;
+        default:
+            console.error('Got an unrecognized view type: ' + viewType);
             break;
     }
 };
@@ -263,17 +322,7 @@ wsServer.on('connection', function (websocket) {
         nowplaying: nowplaying
     }));
 
-    db.then(() => {
-        Track.distinct('artist', function (err, result) {
-            if (!err) {
-                websocket.send(JSON.stringify({
-                    type: MessageType.VIEW_UPDATE,
-                    view: ContextType.ARTIST,
-                    data: result
-                }));
-            }
-        });
-    });
+    db.then(() => handleViewRequest(websocket, ContextType.ALL_ARTISTS));
 
     websocket.on('message', function (msg) {
         let message = {};
@@ -319,7 +368,11 @@ wsServer.on('connection', function (websocket) {
                 case Command.SET_EQ:
                     player.eq(message.data);
                     break;
+                case Command.REQUEST_VIEW:
+                    db.then(() => handleViewRequest(websocket, message.data, message.params));
+                    break;
                 default:
+                    console.error('Got an unrecognized command: ' + message.command);
                     break;
             }
         }
